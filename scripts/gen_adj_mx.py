@@ -2,21 +2,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import argparse
 import numpy as np
 import pandas as pd
 import pickle
-import tensorflow as tf
-
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-
-flags.DEFINE_string('sensor_ids_filename', 'data/sensor_graph/graph_sensor_ids.txt',
-                    'File containing sensor ids separated by comma.')
-flags.DEFINE_string('distances_filename', 'data/sensor_graph/distances_la_2012.csv',
-                    'CSV file containing sensor distances with three columns: [from, to, distance].')
-flags.DEFINE_float('normalized_k', 0.1, 'Entries that become lower than normalized_k after normalization '
-                                        'are set to zero for sparsity.')
-flags.DEFINE_string('output_pkl_filename', 'data/sensor_graph/adj_mat.pkl', 'Path of the output file.')
 
 
 def get_adjacency_matrix(distance_df, sensor_ids, normalized_k=0.1):
@@ -54,10 +43,21 @@ def get_adjacency_matrix(distance_df, sensor_ids, normalized_k=0.1):
 
 
 if __name__ == '__main__':
-    with open(FLAGS.sensor_ids_filename) as f:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sensor_ids_filename', type=str, default='data/sensor_graph/graph_sensor_ids.txt',
+                        help='File containing sensor ids separated by comma.')
+    parser.add_argument('--distances_filename', type=str, default='data/sensor_graph/distances_la_2012.csv',
+                        help='CSV file containing sensor distances with three columns: [from, to, distance].')
+    parser.add_argument('--normalized_k', type=float, default=0.1,
+                        help='Entries that become lower than normalized_k after normalization are set to zero for sparsity.')
+    parser.add_argument('--output_pkl_filename', type=str, default='data/sensor_graph/adj_mat.pkl',
+                        help='Path of the output file.')
+    args = parser.parse_args()
+
+    with open(args.sensor_ids_filename) as f:
         sensor_ids = f.read().strip().split(',')
-    distance_df = pd.read_csv(FLAGS.distances_filename, dtype={'from': 'str', 'to': 'str'})
+    distance_df = pd.read_csv(args.distances_filename, dtype={'from': 'str', 'to': 'str'})
     _, sensor_id_to_ind, adj_mx = get_adjacency_matrix(distance_df, sensor_ids)
     # Save to pickle file.
-    with open(FLAGS.output_pkl_filename, 'wb') as f:
+    with open(args.output_pkl_filename, 'wb') as f:
         pickle.dump([sensor_ids, sensor_id_to_ind, adj_mx], f, protocol=2)

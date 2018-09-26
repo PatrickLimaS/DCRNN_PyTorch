@@ -9,7 +9,7 @@ data:
 
 model:
   cl_decay_steps: 2000
-  filter_type: dual_random_walk
+  filter_type: laplacian
   horizon: 12
   input_dim: 2
   l1_decay: 0
@@ -18,7 +18,7 @@ model:
   num_nodes: 207
   num_rnn_layers: 2
   output_dim: 1
-  rnn_units: 64
+  rnn_units: 16
   seq_len: 12
   use_curriculum_learning: true
 
