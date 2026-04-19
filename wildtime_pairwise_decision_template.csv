@@ -1,0 +1,5 @@
+lhs_model,lhs_acc_mean,lhs_acc_sd,rhs_model,rhs_acc_mean,rhs_acc_sd,mean_diff,pooled_sd,threshold_2sigma,decision
+proposed_full,,,abl_no_residual,,,,,,
+proposed_full,,,abl_frozen_scheduler,,,,,,
+graph_no_residual,,,local_only,,,,,,
+proposed_full,,,local_only,,,,,,
