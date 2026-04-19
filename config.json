@@ -1,0 +1,19 @@
+{
+  "T": 3000,
+  "N": 10,
+  "d_in": 32,
+  "n_classes": 2,
+  "train_end": 1500,
+  "shift1": 1900,
+  "shift2": 2400,
+  "recovery_start": 2700,
+  "d_hid": 48,
+  "d_lat": 20,
+  "epochs": 18,
+  "lr": 0.05,
+  "seeds": [
+    0,
+    1,
+    2
+  ]
+}
