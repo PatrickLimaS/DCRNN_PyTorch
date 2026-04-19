@@ -26,7 +26,14 @@ stand-ins (v2 and harder). No real-benchmark result is yet claimed.
 On both synthetic stand-ins these two components fail to outperform
 their ablations. They are retained as optional modules pending a task
 where they earn their place empirically.
+## Main files
 
+Legacy PDFs in the repository root are retained temporarily and should not be treated as the current authoritative paper version.
+
+- `paper_final_version_draft_regenerated_1776633194.pdf`
+- `paper_validacao_externa.pdf`
+- `REPORT_SPRINT3.md`
+...
 ## Wild-Time positioning
 
 Wild-Time Yearbook is included as a scope / falsification probe.
