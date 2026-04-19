@@ -1,34 +1,58 @@
 # Probingnoise
 
-**Scoped methods project on graph-organized local-global adaptation under temporal shift.**
+Scoped methods project on graph-organized local-global adaptation under temporal shift.
 
-Probingnoise is a narrowed methods project focused on **skip-connected graph coordination** plus **skip-connected local-global aggregation** under temporal shift in tasks with **shared-signal structure across nodes per timestep**.
+## Claim (narrow)
 
-## Current supported core
-- graph coordination with skip+norm
-- local-global aggregation
-- explicit instrumentation and preflight verification
+On tasks where there is shared-signal structure across nodes at each
+timestep, skip-connected graph coordination plus skip-connected
+local-global aggregation is load-bearing under temporal shift.
 
-## Conditional extensions
-The following remain conditional extensions, not validated core claims:
-- residual gating
-- adaptive scheduling
+## Scope of current evidence
 
-## Main files
-- `paper_final_version_draft_regenerated_1776633194-2.pdf`
-- `paper_validacao_externa-4.pdf`
-- `REPORT_SPRINT3.md`
-- `WILDTIME_RUNBOOK.md`
-- `wildtime_loader.py`
-- `preflight_wildtime.py`
-- `run_wildtime.py`
-- `results_aggregate.csv`
+All empirical evidence in this repository comes from two synthetic
+stand-ins (v2 and harder). No real-benchmark result is yet claimed.
+
+## Validated core
+
+- Graph coordination with skip + LayerNorm
+- Local-global aggregation with skip connection
+
+## Conditional extensions (not validated core)
+
+- Residual gating
+- Adaptive scheduling
+
+On both synthetic stand-ins these two components fail to outperform
+their ablations. They are retained as optional modules pending a task
+where they earn their place empirically.
+
+## Wild-Time positioning
+
+Wild-Time Yearbook is included as a scope / falsification probe.
+Yearbook lacks per-timestep cross-node shared structure, so a null
+result there would confirm the scope limit of the claim, not falsify
+the method. A positive benchmark requires a Wild-Time task whose
+distribution-shift structure is cross-node correlated per timestep
+(candidates: arXiv, MIMIC).
 
 ## Project status
-- narrowed paper framing: done
-- closed demo framing: done
-- real-benchmark claim: pending
-- final A/B/C classification on Wild-Time: pending
+
+| Item | Status |
+| --- | --- |
+| Narrow claim framing | done |
+| Synthetic stand-in evidence (v2 + harder) | done |
+| Scope-matched real benchmark | pending |
+| Wild-Time Yearbook scope probe | pending |
+
+## Repository layout
+
+- `REPORT_SPRINT3.md` — current empirical report
+- `WILDTIME_RUNBOOK.md` — runbook for the Yearbook scope probe
+- `wildtime_loader.py`, `preflight_wildtime.py`, `run_wildtime.py` — adapter and runner
+- `results_aggregate.csv`, `per_regime_table.csv`, `latency_table.csv` — synthetic stand-in results
+- `archive/` — superseded drafts, retained for provenance only
 
 ## Author
-**Patrick Lima, S. DS
+
+Patrick S.,DS
