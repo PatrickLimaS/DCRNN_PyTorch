@@ -25,3 +25,12 @@ No real scope-matched benchmark has yet been run with a replicated multi-seed pa
 ## Gap 6: Larger-graph behavior is untested here
 
 The public claim is not yet backed by normalized evidence on larger real graph benchmarks in this validation system.
+## Gap 7: Current METR-LA ablation packet is not yet stable
+
+Initial real-benchmark contact exists through the DCRNN/METR-LA substrate, but the current min-sweep remains below transfer threshold:
+- `probingnoise_graph_core` completed only as a single-seed short run
+- `abl_no_graph` failed with an inplace-operation autograd error
+- `local_only` failed with the same error
+- `abl_no_aggregation` has only partial validation evidence
+
+Therefore the current METR-LA state is informative but not yet eligible for public claim extension.
