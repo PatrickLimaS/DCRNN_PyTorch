@@ -1,0 +1,3 @@
+target_id,variant,in_scope,role,n_seeds,seed_std,effect_vs_baseline,effect_sigma_ratio,replicated,baseline_collapse,null_observed,verdict,rationale
+yearbook,graph_core,False,scope_probe,1,nan,0.000,nan,False,False,True,INCONCLUSIVE,scope_confirmation_not_falsification
+arxiv_wildtime,graph_core,True,scope_match,1,nan,0.000,nan,False,False,True,INCONCLUSIVE,insufficient_seeds
