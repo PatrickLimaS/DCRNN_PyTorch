@@ -35,3 +35,9 @@ Initial real-benchmark contact exists through the DCRNN/METR-LA substrate, but t
 - `abl_no_aggregation` has only partial validation evidence
 
 Therefore the current METR-LA state is informative but not yet eligible for public claim extension.
+
+## Gap 8: METR-LA provisional read remains inconclusive
+
+A provisional minimum sweep on the DCRNN/METR-LA substrate (1 seed, 10 epochs) does not currently show a measurable advantage for `probingnoise_graph_core` over a repaired `local_only` path under this short-budget protocol. Current completed reads are near-tied (`graph_core` test_mae 0.2575; `local_only` test_mae 0.2565), while `abl_no_aggregation` remains partial and `abl_no_graph` has not yet been cleanly rerun under the corrected `use_graph=False` path.
+
+This state is classified as `INCONCLUSIVE` under the project decision rules and does not constitute evidence either for or against the graph-coordination pillar on METR-LA. The current substrate remains below transfer threshold because the baseline reproduction gate, the canonical 3-seed requirement, and the full primary variant packet are not yet complete.
