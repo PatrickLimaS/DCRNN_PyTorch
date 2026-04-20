@@ -25,6 +25,7 @@ No real scope-matched benchmark has yet been run with a replicated multi-seed pa
 ## Gap 6: Larger-graph behavior is untested here
 
 The public claim is not yet backed by normalized evidence on larger real graph benchmarks in this validation system.
+
 ## Gap 7: Current METR-LA ablation packet is not yet stable
 
 Initial real-benchmark contact exists through the DCRNN/METR-LA substrate, but the current min-sweep remains below transfer threshold:
