@@ -1,0 +1,64 @@
+version: 1
+substrate_id: dcrnn_pytorch_metrla
+last_updated: 2026-04-20
+
+benchmark:
+  id: METR-LA
+  in_scope: true
+  role: scope_match
+  primary_metric: MAE_at_h12
+  horizons_steps: [3, 6, 12]
+  notes: >
+    Real spatio-temporal benchmark candidate for testing the Probingnoise
+    two-pillar claim through the local DCRNN substrate.
+
+seeds:
+  canonical: [42, 1337, 2024]
+  policy: >
+    No variant is considered ready for review until all canonical seeds
+    are completed or explicitly marked failed with explanation.
+
+variants:
+
+  - id: dcrnn_baseline
+    role: baseline
+    status: in_progress
+    seeds_completed: []
+    notes: >
+      Baseline reproducibility gate. Must be in a reasonable METR-LA range
+      before any Probingnoise variant is interpretable.
+
+  - id: probingnoise_graph_core
+    role: core_variant
+    status: in_progress
+    seeds_completed: []
+    notes: >
+      Primary test of graph coordination + local-global aggregation.
+
+  - id: abl_no_graph
+    role: ablation
+    status: not_started
+    seeds_completed: []
+    notes: >
+      Removes graph coordination.
+
+  - id: abl_no_aggregation
+    role: ablation
+    status: not_started
+    seeds_completed: []
+    notes: >
+      Removes local-global aggregation.
+
+  - id: abl_graph_no_skip
+    role: optional_ablation
+    status: not_started
+    seeds_completed: []
+    notes: >
+      Optional isolation test for graph-side skip+normalization.
+
+  - id: abl_agg_no_skip
+    role: optional_ablation
+    status: not_started
+    seeds_completed: []
+    notes: >
+      Optional isolation test for aggregation-side skip+normalization.
