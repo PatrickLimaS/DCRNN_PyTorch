@@ -1,7 +1,6 @@
 # Probingnoise
 
-Scoped methods project on graph-organized local-global adaptation under temporal shift.
-
+Probingnoise treats adaptation under temporal shift as a coordination problem, not just a local prediction problem.
 ## Claim (narrow)
 
 On tasks where there is shared-signal structure across nodes at each
