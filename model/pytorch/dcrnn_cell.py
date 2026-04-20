@@ -2,6 +2,7 @@ import numpy as np
 import torch
 
 from lib import utils
+from model.pytorch.probingnoise_blocks import SkipLayerNorm
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -35,7 +36,9 @@ class LayerParams:
 
 class DCGRUCell(torch.nn.Module):
     def __init__(self, num_units, adj_mx, max_diffusion_step, num_nodes, nonlinearity='tanh',
-                 filter_type="laplacian", use_gc_for_ru=True):
+                 filter_type="laplacian", use_gc_for_ru=True,
+                 use_graph=True, use_aggregation=False,
+                 use_graph_skip_ln=False, use_agg_skip_ln=False):
         """
 
         :param num_units:
@@ -48,6 +51,12 @@ class DCGRUCell(torch.nn.Module):
         """
 
         super().__init__()
+        self._pn_flags = {
+            "use_graph": bool(use_graph),
+            "use_aggregation": bool(use_aggregation),
+            "use_graph_skip_ln": bool(use_graph_skip_ln),
+            "use_agg_skip_ln": bool(use_agg_skip_ln),
+        }
         self._activation = torch.tanh if nonlinearity == 'tanh' else torch.relu
         # support other nonlinearities up here?
         self._num_nodes = num_nodes
@@ -67,6 +76,20 @@ class DCGRUCell(torch.nn.Module):
             supports.append(utils.calculate_scaled_laplacian(adj_mx))
         for support in supports:
             self._supports.append(self._build_sparse_matrix(support))
+
+        # Patch 3: instantiate skip+LN wrapper lazily here so its parameters
+        # are registered as submodules of this cell. The wrapper is only
+        # *applied* in forward() when use_graph_skip_ln is True.
+        if self._pn_flags["use_graph_skip_ln"]:
+            # Wraps a no-op inner module; skip+LN is applied around the cell's
+            # own output, not around an inner transformation. The inner module
+            # must be an nn.Module returning zeros of the right shape.
+            class _ZeroModule(torch.nn.Module):
+                def forward(self, x):
+                    return torch.zeros_like(x)
+            self._graph_skip_ln = SkipLayerNorm(_ZeroModule(), normalized_shape=num_units)
+        else:
+            self._graph_skip_ln = None
 
         self._fc_params = LayerParams(self, 'fc')
         self._gconv_params = LayerParams(self, 'gconv')
@@ -89,21 +112,57 @@ class DCGRUCell(torch.nn.Module):
         - Output: A `2-D` tensor with shape `(B, num_nodes * rnn_units)`.
         """
         output_size = 2 * self._num_units
+
+        # Patch 3: flag consumption.
+        # use_graph=False routes graph conv calls through _fc (no diffusion).
+        # This is the "disable_graph" ablation (local_only, abl_no_graph).
+        if self._pn_flags["use_graph"]:
+            graph_fn = self._gconv
+        else:
+            # Upstream _fc applies sigmoid internally, but _gconv does not.
+            # In the forward, value = sigmoid(fn(...)) applies sigmoid once;
+            # c = graph_fn(...) expects no sigmoid (c is then activated via
+            # self._activation, typically tanh). So when use_graph=False we
+            # need a linear _fc variant without internal sigmoid.
+            def _fc_linear(inputs, state, output_size, bias_start=0.0):
+                batch_size = inputs.shape[0]
+                inputs_r = torch.reshape(inputs, (batch_size * self._num_nodes, -1))
+                state_r = torch.reshape(state, (batch_size * self._num_nodes, -1))
+                inputs_and_state = torch.cat([inputs_r, state_r], dim=-1)
+                input_size = inputs_and_state.shape[-1]
+                weights = self._fc_params.get_weights((input_size, output_size))
+                value = torch.matmul(inputs_and_state, weights)
+                biases = self._fc_params.get_biases(output_size, bias_start)
+                value = value + biases
+                return torch.reshape(value, (-1, self._num_nodes * output_size)).clone()
+            graph_fn = _fc_linear
+
         if self._use_gc_for_ru:
-            fn = self._gconv
+            fn = graph_fn
         else:
             fn = self._fc
+
         value = torch.sigmoid(fn(inputs, hx, output_size, bias_start=1.0))
         value = torch.reshape(value, (-1, self._num_nodes, output_size))
         r, u = torch.split(tensor=value, split_size_or_sections=self._num_units, dim=-1)
         r = torch.reshape(r, (-1, self._num_nodes * self._num_units))
         u = torch.reshape(u, (-1, self._num_nodes * self._num_units))
 
-        c = self._gconv(inputs, r * hx, self._num_units)
+        c = graph_fn(inputs, r * hx, self._num_units)
         if self._activation is not None:
             c = self._activation(c)
 
         new_state = u * hx + (1.0 - u) * c
+
+        # Patch 3: use_graph_skip_ln wraps the cell output with SkipLayerNorm.
+        # Shape contract: new_state is (batch, num_nodes * num_units).
+        # SkipLayerNorm expects trailing dim == num_units, so reshape.
+        if self._graph_skip_ln is not None:
+            b = new_state.shape[0]
+            new_state = new_state.view(b, self._num_nodes, self._num_units)
+            new_state = self._graph_skip_ln(new_state)
+            new_state = new_state.reshape(b, self._num_nodes * self._num_units)
+
         return new_state
 
     @staticmethod

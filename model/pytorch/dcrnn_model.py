@@ -3,6 +3,31 @@ import torch
 import torch.nn as nn
 
 from model.pytorch.dcrnn_cell import DCGRUCell
+from model.pytorch.probingnoise_blocks import LocalGlobalAggBlock, SkipLayerNorm
+
+_PROBINGNOISE_DEFAULTS = {
+    "use_graph": True,
+    "use_aggregation": False,
+    "use_graph_skip_ln": False,
+    "use_agg_skip_ln": False,
+}
+
+
+def _resolve_pn_flags(pn_kwargs):
+    flags = dict(_PROBINGNOISE_DEFAULTS)
+    if not pn_kwargs:
+        return flags
+    unknown = set(pn_kwargs.keys()) - set(_PROBINGNOISE_DEFAULTS.keys())
+    if unknown:
+        import warnings
+        warnings.warn(
+            f"probingnoise: ignoring unknown flag(s) {sorted(unknown)}; "
+            f"known flags are {sorted(_PROBINGNOISE_DEFAULTS.keys())}",
+            RuntimeWarning,
+        )
+    flags.update({k: bool(v) for k, v in pn_kwargs.items() if k in _PROBINGNOISE_DEFAULTS})
+    return flags
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -24,14 +49,15 @@ class Seq2SeqAttrs:
 
 
 class EncoderModel(nn.Module, Seq2SeqAttrs):
-    def __init__(self, adj_mx, **model_kwargs):
+    def __init__(self, adj_mx, pn_flags=None, **model_kwargs):
         nn.Module.__init__(self)
         Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
         self.input_dim = int(model_kwargs.get('input_dim', 1))
         self.seq_len = int(model_kwargs.get('seq_len'))  # for the encoder
+        self._pn_flags = pn_flags if pn_flags is not None else dict(_PROBINGNOISE_DEFAULTS)
         self.dcgru_layers = nn.ModuleList(
             [DCGRUCell(self.rnn_units, adj_mx, self.max_diffusion_step, self.num_nodes,
-                       filter_type=self.filter_type) for _ in range(self.num_rnn_layers)])
+                       filter_type=self.filter_type, **self._pn_flags) for _ in range(self.num_rnn_layers)])
 
     def forward(self, inputs, hidden_state=None):
         """
@@ -59,16 +85,17 @@ class EncoderModel(nn.Module, Seq2SeqAttrs):
 
 
 class DecoderModel(nn.Module, Seq2SeqAttrs):
-    def __init__(self, adj_mx, **model_kwargs):
+    def __init__(self, adj_mx, pn_flags=None, **model_kwargs):
         # super().__init__(is_training, adj_mx, **model_kwargs)
         nn.Module.__init__(self)
         Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
         self.output_dim = int(model_kwargs.get('output_dim', 1))
         self.horizon = int(model_kwargs.get('horizon', 1))  # for the decoder
         self.projection_layer = nn.Linear(self.rnn_units, self.output_dim)
+        self._pn_flags = pn_flags if pn_flags is not None else dict(_PROBINGNOISE_DEFAULTS)
         self.dcgru_layers = nn.ModuleList(
             [DCGRUCell(self.rnn_units, adj_mx, self.max_diffusion_step, self.num_nodes,
-                       filter_type=self.filter_type) for _ in range(self.num_rnn_layers)])
+                       filter_type=self.filter_type, **self._pn_flags) for _ in range(self.num_rnn_layers)])
 
     def forward(self, inputs, hidden_state=None):
         """
@@ -95,11 +122,26 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
 
 
 class DCRNNModel(nn.Module, Seq2SeqAttrs):
-    def __init__(self, adj_mx, logger, **model_kwargs):
+    def __init__(self, adj_mx, logger, pn_kwargs=None, **model_kwargs):
         super().__init__()
         Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
-        self.encoder_model = EncoderModel(adj_mx, **model_kwargs)
-        self.decoder_model = DecoderModel(adj_mx, **model_kwargs)
+        self._pn_flags = _resolve_pn_flags(pn_kwargs)
+        logger.info("probingnoise flags resolved: %s", self._pn_flags)
+
+        # Patch 3 (File 5): instantiate aggregation module on DCRNNModel so it
+        # is visible to both encoder and decoder code paths. Applied once per
+        # forward, on the final encoder hidden state, before the decoder runs.
+        if self._pn_flags["use_aggregation"]:
+            agg = LocalGlobalAggBlock(num_nodes=self.num_nodes,
+                                      hidden_dim=self.rnn_units)
+            if self._pn_flags["use_agg_skip_ln"]:
+                self._agg_block = SkipLayerNorm(agg, normalized_shape=self.num_nodes * self.rnn_units)
+            else:
+                self._agg_block = agg
+        else:
+            self._agg_block = None
+        self.encoder_model = EncoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
+        self.decoder_model = DecoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
         self.cl_decay_steps = int(model_kwargs.get('cl_decay_steps', 1000))
         self.use_curriculum_learning = bool(model_kwargs.get('use_curriculum_learning', False))
         self._logger = logger
@@ -117,6 +159,17 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         encoder_hidden_state = None
         for t in range(self.encoder_model.seq_len):
             _, encoder_hidden_state = self.encoder_model(inputs[t], encoder_hidden_state)
+
+        # Patch 3 (File 5): local-global aggregation on the final hidden state,
+        # applied per RNN layer. Each layer has shape
+        # (batch_size, num_nodes * rnn_units); LocalGlobalAggBlock reshapes
+        # internally to (B, N, H) and returns to (B, N*H).
+        if self._agg_block is not None:
+            num_layers = encoder_hidden_state.size(0)
+            aggregated = []
+            for layer_idx in range(num_layers):
+                aggregated.append(self._agg_block(encoder_hidden_state[layer_idx]))
+            encoder_hidden_state = torch.stack(aggregated, dim=0)
 
         return encoder_hidden_state
 

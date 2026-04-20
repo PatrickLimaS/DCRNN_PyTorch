@@ -4,7 +4,10 @@ import os
 import pickle
 import scipy.sparse as sp
 import sys
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 from scipy.sparse import linalg
 

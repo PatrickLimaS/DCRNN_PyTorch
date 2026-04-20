@@ -18,6 +18,7 @@ class DCRNNSupervisor:
         self._data_kwargs = kwargs.get('data')
         self._model_kwargs = kwargs.get('model')
         self._train_kwargs = kwargs.get('train')
+        self._pn_kwargs = kwargs.get('probingnoise', {}) or {}
 
         self.max_grad_norm = self._train_kwargs.get('max_grad_norm', 1.)
 
@@ -41,7 +42,9 @@ class DCRNNSupervisor:
         self.horizon = int(self._model_kwargs.get('horizon', 1))  # for the decoder
 
         # setup model
-        dcrnn_model = DCRNNModel(adj_mx, self._logger, **self._model_kwargs)
+        dcrnn_model = DCRNNModel(adj_mx, self._logger,
+                                 pn_kwargs=self._pn_kwargs,
+                                 **self._model_kwargs)
         self.dcrnn_model = dcrnn_model.cuda() if torch.cuda.is_available() else dcrnn_model
         self._logger.info("Model created")
 
