@@ -1,0 +1,61 @@
+\section{Asynchronous Inferential Cascade: A $\to$ B $\to$ C}
+\label{sec:cascade-abc}
+
+This section specifies a three-stage asynchronous inferential cascade layered
+on top of the existing \textsc{Probingnoise} core. The cascade is a proposed
+architectural extension and is not empirically validated within the present
+work. The \textsc{Probingnoise} core remains the implemented synchronous,
+Colab-trainable base; its blocks, residual pathways, and training regime are
+preserved.
+
+\subsection{Positioning}
+
+The three stages address three distinct regimes of asynchrony identified as
+architecturally independent.
+
+\paragraph{Stage A --- multi-rate ingestion.} Heterogeneous input streams
+(e.g., visual frames, auxiliary sensors, discrete events) arrive at different
+timescales. Stage A normalizes them into a common representational substrate
+without imposing a global synchronization barrier. Its architectural role is
+to decouple upstream rate from downstream computation. Prior work on
+event-driven and asynchronous graph processing~\citep{faber2022async,faber2024gwac}
+establishes that useful representation can be maintained without strict
+message-level synchronization; we adopt this only as lineage.
+
+\paragraph{Stage B --- heterogeneous compute.} The \textsc{Probingnoise} core
+operates within Stage B as the spatiotemporal backbone. Sub-processes within
+this stage have unequal computational cost, and a synchronous schedule would
+block fast sub-processes behind slow ones. Stage B is specified to permit
+non-blocking progress across sub-processes, drawing architectural precedent
+from lock-free stochastic optimization~\citep{niu2011hogwild} and foundational
+work on asynchronous iterative methods~\citep{bertsekas1989parallel}. No
+property of those works is inherited as a property of the current
+implementation.
+
+\paragraph{Stage C --- anytime refinement.} The topmost stage is specified to
+emit partial predictions and continue refining in the background, rather than
+blocking output on convergence. This design follows the general
+anytime-algorithm regime; the contribution here is integration with Stages A
+and B within a consistent cascade, not the anytime principle itself.
+
+\subsection{Contribution boundary}
+
+Novelty is claimed at the level of the integrated cascade --- specifically,
+the assignment of one asynchronous regime to each stage and the specification
+of their composition on top of the \textsc{Probingnoise} residual structure
+--- rather than at the level of any individual stage component. Empirical
+validation of the cascade is deferred to future work.
+
+\subsection{Invariants}
+
+\begin{itemize}
+  \item Downstream stages never block on strict ordering guarantees from upstream stages.
+  \item Each stage has an explicit definition of what ``partial output'' means for it.
+  \item The \textsc{Probingnoise} core is preserved as-is within Stage B.
+\end{itemize}
+
+\subsection{Composition rule}
+
+$A \to B \to C$ is a directional cascade. Each boundary is an async buffer,
+not a synchronous hand-off. Backpressure is handled per-stage (drop-oldest by
+default).
