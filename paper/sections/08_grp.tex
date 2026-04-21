@@ -1,0 +1,17 @@
+\section{Global Re-entry Projection (GRP)}
+\label{sec:grp}
+
+GRP is a proposed architectural operator for Stage~B of the cascade
+(Section~\ref{sec:cascade-abc}). It is specified in this paper; it is not
+empirically validated.
+
+\subsection{Specification}
+\begin{align}
+  g_t &= P(H_t) \\
+  p_{i,t} &= W_g \, g_t \\
+  \tilde{h}_{i,t} &= \mathrm{LN}(h_{i,t} + \alpha \, p_{i,t})
+\end{align}
+Setting $\alpha = 0$ recovers the unmodified core.
+
+\subsection{Claim boundary}
+No empirical claim; validation is gate-blocked by the baseline reproduction step.

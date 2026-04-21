@@ -202,3 +202,7 @@ distribution-shift structure is cross-node correlated per timestep
 ## Author
 
 Patrick S.,DS
+
+## Related Stack
+
+Researchers in async computation, async graph learning, event-based / neuromorphic vision, state-space / streaming models, anytime and early-exit inference, vision-language-action models, change-point / anomaly detection, concept drift, or burst / criticality in neural dynamics: see [`paper/sections/10_related_lineages.md`](paper/sections/10_related_lineages.md) for the full lineage map, and [`MEDIA.md`](MEDIA.md) for a visual gallery of the stack.

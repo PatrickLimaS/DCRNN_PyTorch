@@ -1,19 +1,20 @@
-# Paper materials — positioning v1 + cascade ABC v1
-
-This directory contains publication-ready positioning and related-work
-material for the Probingnoise paper, plus the ABC cascade specification.
+# Paper materials
 
 ## Structure
-- sections/01_main_paragraph.md — main paragraph
-- sections/02_short_paragraph.md — ACL/IEEE short version
-- sections/03_one_sentence_bridge.md — one-sentence bridge
-- sections/04_related_work.md — full related-work subsection
-- sections/04_related_work.tex — LaTeX source
-- sections/05_terminology_and_reviewer_preemption.md — terminology + reviewer notes
-- sections/06_cascade_abc.md — asynchronous inferential cascade (A → B → C)
-- sections/06_cascade_abc.tex — LaTeX source of the cascade section
-- bibtex/references.bib — BibTeX entries
 
-All text follows the four-tier claim protocol: implemented fact /
-literature-supported framing / proposed extension / future work — with zero
-drift between tiers. See top-level GOVERNANCE.md.
+- sections/01_main_paragraph.md — main paragraph
+- sections/02_short_paragraph.md — ACL/IEEE short
+- sections/03_one_sentence_bridge.md
+- sections/04_related_work.md + .tex — related work
+- sections/05_terminology_and_reviewer_preemption.md
+- sections/06_cascade_abc.md + .tex — async cascade
+- sections/07_motivation.md + .tex — deliberating-agent analogy
+- sections/08_grp.md + .tex — Global Re-entry Projection
+- sections/09_robotic_vision_lineage.md + .tex
+- sections/10_related_lineages.md + .tex — structural + conceptual
+- sections/11_droid_openvla_integration.md + .tex — integration targets
+- bibtex/references.bib
+
+Partial reports: `docs/partial_reports/`. Template: `docs/PARTIAL_REPORT_TEMPLATE.md`.
+
+Four-tier claim protocol. See `GOVERNANCE.md`.
