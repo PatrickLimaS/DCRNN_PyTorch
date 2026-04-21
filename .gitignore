@@ -97,3 +97,10 @@ tmp/
 *.npy
 *.npz
 empirical_validation/reporting/classification_summary.md
+
+# Large artifacts — never commit
+*.bundle
+*.tar.gz
+backup-*
+data/metr-la.h5
+data/pems-bay.h5
