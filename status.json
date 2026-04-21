@@ -1,0 +1,12 @@
+{
+  "baseline_gate_cleared": false,
+  "transfer_eligible": false,
+  "active_stage": "stage_1_local_global_divergence",
+  "runs": {
+    "dcrnn_baseline":           { "state": "not_run",  "classification": "GATE_BLOCKING" },
+    "probingnoise_graph_core":  { "state": "completed", "metric": "test_mae", "value": 0.2575, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs" },
+    "local_only":               { "state": "completed", "metric": "test_mae", "value": 0.2565, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs, post fc_linear clone fix" },
+    "abl_no_graph":             { "state": "completed", "metric": "test_mae", "value": 0.2578, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs, post-fix rerun" },
+    "abl_no_aggregation":       { "state": "partial",   "metric": "val_mae (latest)", "value": 0.2494, "classification": "INCONCLUSIVE", "notes": "not a completed row; must finish" }
+  }
+}

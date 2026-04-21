@@ -1,3 +1,6 @@
+> **⚠️ Governance status: BASELINE GATE NOT CLEARED.**
+> Current evidence is INCONCLUSIVE. No real-benchmark claim is authorized.
+> See [GOVERNANCE.md](GOVERNANCE.md) and [NEXT_STEPS.md](NEXT_STEPS.md).
 # DCRNN_PyTorch + Probingnoise
 
 This repository merges DCRNN PyTorch implementation with the Probingnoise validation & paper work.

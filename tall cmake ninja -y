@@ -1,0 +1,12 @@
+[32mgn[0m/stable 20251217 aarch64
+  Meta-build system that generates build files for Ninja
+
+[32mlugaru[0m/x11 1.2 aarch64
+  Lugaru HD, free and open source ninja rabbit fighting game
+
+[32mninja[0m/stable 1.13.2 aarch64
+  A small build system with a focus on speed
+
+[32msamurai[0m/stable 1.2-2 aarch64
+  ninja-compatible build tool written in C
+
