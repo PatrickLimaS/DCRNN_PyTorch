@@ -1,0 +1,17 @@
+# Motivation — Deliberating-Agent Analogy (claim-safe)
+
+We describe the cascade's design scope by analogy to a deliberating agent,
+with the analogy used strictly as motivational framing and not as an
+empirical claim.
+
+Stage A corresponds to heterogeneous-timescale evidence intake; Stage B to
+workspace-style composition of sub-processes with unequal compute cost;
+Stage C to time-bounded decision emission with background refinement.
+
+Optional consultation of a language model is specified as an external
+oracle step, not as an integrated reasoning component.
+
+No property of cognition, understanding, or reasoning is claimed for the
+system; the analogy is used to motivate the assignment of three distinct
+asynchronous regimes to three distinct stages, which is the contribution
+of this work.
