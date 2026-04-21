@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PROBINGNOISE // DCRNN_PyTorch</title>
+<meta name="description" content="Claim-disciplined research substrate. Asynchronous inferential cascade on top of DCRNN_PyTorch. pytorch_scratch." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #000000;
+    --bg-soft: #050505;
+    --bg-panel: #0a0a0a;
+    --ink: #d8d8d8;
+    --ink-dim: #6a6a6a;
+    --ink-dimmer: #3a3a3a;
+    --accent: #00ff9c;
+    --accent-dim: #00875a;
+    --warn: #ff4d4d;
+    --line: #1a1a1a;
+    --mono: "JetBrains Mono", "Space Mono", ui-monospace, monospace;
+    --display: "Space Mono", "JetBrains Mono", ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.55;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+    z-index: 99;
+  }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .15s; }
+  a:hover { border-bottom-color: var(--accent); }
+  .topbar { position: sticky; top: 0; z-index: 50; background: var(--bg); border-bottom: 1px solid var(--line); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-dim); }
+  .topbar-inner { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; max-width: 1280px; margin: 0 auto; }
+  .topbar .blip { display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; margin-right: 8px; animation: blip 1.4s infinite; box-shadow: 0 0 8px var(--accent); }
+  @keyframes blip { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  main { max-width: 1280px; margin: 0 auto; padding: 48px 24px 96px; }
+  .hero { padding: 48px 0 64px; position: relative; }
+  .hero .bracket-top { color: var(--accent-dim); font-size: 12px; letter-spacing: 0.2em; margin-bottom: 24px; }
+  .hero h1 { font-family: var(--display); font-size: clamp(34px, 7vw, 88px); font-weight: 700; line-height: 0.95; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 16px; }
+  .hero h1 .slash { color: var(--accent); }
+  .hero h1 .dim { color: var(--ink-dim); font-weight: 300; }
+  .hero .sub { font-size: clamp(14px, 1.6vw, 18px); color: var(--ink-dim); max-width: 640px; margin: 24px 0 40px; line-height: 1.7; }
+  .prompt { display: flex; align-items: center; gap: 10px; margin-top: 32px; padding: 14px 18px; border: 1px solid var(--line); background: var(--bg-soft); font-size: 13px; }
+  .prompt .ps { color: var(--accent); }
+  .prompt .cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); margin-left: 4px; animation: cursor 0.9s steps(2) infinite; }
+  @keyframes cursor { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .grid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 40px 0; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 720px) { .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; } }
+  .cell { background: var(--bg-panel); padding: 24px 22px; position: relative; }
+  .cell .label { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-dim); text-transform: uppercase; margin-bottom: 12px; }
+  .cell .value { font-family: var(--display); font-size: 20px; color: var(--ink); }
+  .cell .value.accent { color: var(--accent); }
+  .cell .note { font-size: 11px; color: var(--ink-dim); margin-top: 8px; line-height: 1.5; }
+  .cell .value.pending { color: var(--warn); }
+  .cell .value.pending::before { content: "\2022 "; }
+  section { margin-top: 72px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 28px; }
+  .sec-head .num { font-family: var(--display); font-size: 11px; color: var(--accent); letter-spacing: 0.2em; }
+  .sec-head h2 { font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--ink); letter-spacing: -0.01em; }
+  .sec-head .suffix { margin-left: auto; font-size: 10px; color: var(--ink-dimmer); letter-spacing: 0.2em; }
+  .cascade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  @media (max-width: 720px) { .cascade { grid-template-columns: 1fr; } }
+  .stage { background: var(--bg-panel); padding: 32px 22px; position: relative; overflow: hidden; }
+  .stage .tag { font-family: var(--display); font-size: 48px; color: var(--accent); line-height: 1; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .stage .name { font-size: 11px; color: var(--ink-dim); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; }
+  .stage .desc { font-size: 13px; color: var(--ink); line-height: 1.6; margin-bottom: 18px; }
+  .stage .pulse { display: flex; gap: 3px; margin-top: 20px; }
+  .stage .pulse span { flex: 1; height: 1px; background: var(--ink-dimmer); animation: pulse 2s infinite; }
+  .stage:nth-child(1) .pulse span { animation-delay: 0s; }
+  .stage:nth-child(2) .pulse span { animation-delay: 0.3s; }
+  .stage:nth-child(3) .pulse span { animation-delay: 0.6s; }
+  .stage .pulse span:nth-child(2) { animation-delay: 0.1s; }
+  .stage .pulse span:nth-child(3) { animation-delay: 0.2s; }
+  .stage .pulse span:nth-child(4) { animation-delay: 0.3s; }
+  .stage .pulse span:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%, 100% { background: var(--ink-dimmer); } 50% { background: var(--accent); box-shadow: 0 0 8px var(--accent); } }
+  .lineage-group { margin-bottom: 28px; }
+  .lineage-group h3 { font-size: 11px; color: var(--ink-dim); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 14px; font-weight: 400; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); background: var(--bg-soft); font-size: 11px; color: var(--ink-dim); letter-spacing: 0.04em; transition: all .2s; }
+  .pill:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,255,156,0.03); }
+  .pill::before { content: "\25B8"; color: var(--accent-dim); font-size: 9px; }
+  .tiers { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .tier { background: var(--bg-panel); padding: 18px 22px; display: grid; grid-template-columns: 80px 140px 1fr; gap: 20px; align-items: baseline; }
+  @media (max-width: 720px) {
+    .tier { grid-template-columns: 60px 1fr; }
+    .tier .status { grid-column: 2; }
+    .tier .desc { grid-column: 1 / -1; color: var(--ink-dim); font-size: 12px; }
+  }
+  .tier .n { font-family: var(--display); color: var(--accent); font-size: 22px; }
+  .tier .status { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-dim); text-transform: uppercase; }
+  .tier .desc { font-size: 13px; color: var(--ink); }
+  .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 40px; }
+  @media (max-width: 720px) { .actions { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 420px) { .actions { grid-template-columns: 1fr; } }
+  .action { background: var(--bg-panel); padding: 28px 22px; display: flex; flex-direction: column; gap: 8px; border-bottom: 2px solid transparent; transition: all .2s; }
+  .action:hover { background: rgba(0,255,156,0.04); border-bottom-color: var(--accent); }
+  .action .label { font-size: 10px; color: var(--ink-dim); letter-spacing: 0.2em; text-transform: uppercase; }
+  .action .arrow { font-family: var(--display); color: var(--accent); font-size: 18px; margin-top: 4px; }
+  .action .title { font-family: var(--display); color: var(--ink); font-size: 16px; }
+  footer { border-top: 1px solid var(--line); margin-top: 96px; padding: 32px 0; font-size: 11px; color: var(--ink-dim); }
+  footer .inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  footer .trail { letter-spacing: 0.1em; }
+  .mono-small { font-size: 11px; color: var(--ink-dim); letter-spacing: 0.04em; }
+  .hr { border: none; border-top: 1px dashed var(--line); margin: 48px 0; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div><span class="blip"></span>PROBINGNOISE :: DCRNN_PyTorch :: pytorch_scratch</div>
+    <div>STATUS: RESEARCH IN PROGRESS</div>
+  </div>
+</div>
+<main>
+  <section class="hero">
+    <div class="bracket-top">[ 01 / ENTRY_POINT ]</div>
+    <h1><span>Probingnoise</span><span class="slash"> &times; </span><span class="dim">DCRNN_PyTorch</span></h1>
+    <p class="sub">A claim-disciplined research substrate for an asynchronous inferential cascade on top of a spatiotemporal graph backbone. Three stages. Heterogeneous compute. Anytime refinement. No capability claims without evidence.</p>
+    <div class="prompt"><span class="ps">patricklimas@research$</span><span>git checkout pytorch_scratch<span class="cursor"></span></span></div>
+  </section>
+  <section>
+    <div class="sec-head"><div class="num">02</div><h2>Operational status</h2><div class="suffix">::governance</div></div>
+    <div class="grid cols-3">
+      <div class="cell"><div class="label">Baseline gate</div><div class="value pending">NOT CLEARED</div><div class="note">dcrnn_baseline has not been run to completion. Blocks all transfer-eligible claims.</div></div>
+      <div class="cell"><div class="label">Defended runs</div><div class="value">0</div><div class="note">Empty by design. Promotion requires cleared baseline and consistent-budget rerun.</div></div>
+      <div class="cell"><div class="label">Active stage</div><div class="value accent">01</div><div class="note">stage1_local_global_divergence. See active/ in repo.</div></div>
+    </div>
+  </section>
+Part 3 OK: 10760 bytescat
+  <section>
+    <div class="sec-head"><div class="num">03</div><h2>The cascade</h2><div class="suffix">::specification</div></div>
+    <div class="cascade">
+      <div class="stage"><div class="tag">A</div><div class="name">Multi-rate ingestion</div><div class="desc">Heterogeneous streams at native rates. Decouples upstream from downstream. Emits time-tagged snapshots.</div><div class="pulse"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="stage"><div class="tag">B</div><div class="name">Heterogeneous compute</div><div class="desc">Probingnoise core. Sub-processes of unequal cost. Lock-free. Bounded staleness. GRP operator specified here.</div><div class="pulse"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="stage"><div class="tag">C</div><div class="name">Anytime refinement</div><div class="desc">Partial predictions under time constraint. Background refinement continues. Optional external oracle.</div><div class="pulse"><span></span><span></span><span></span><span></span><span></span></div></div>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><div class="num">04</div><h2>Claim protocol</h2><div class="suffix">::four-tier, zero-drift</div></div>
+    <div class="tiers">
+      <div class="tier"><div class="n">I</div><div class="status">Implemented</div><div class="desc">Synchronous DCRNN-PyTorch stack. Auditable, trainable, versioned.</div></div>
+      <div class="tier"><div class="n">II</div><div class="status">Literature</div><div class="desc">Async computation, async graph learning, multimodal encoders. Cited as lineage only.</div></div>
+      <div class="tier"><div class="n">III</div><div class="status">Proposed</div><div class="desc">Cascade ABC, GRP operator, DROID/OpenVLA integration targets. Specification voice.</div></div>
+      <div class="tier"><div class="n">IV</div><div class="status">Future</div><div class="desc">Empirical validation, multi-seed sweeps, visual / language extension. Gate-blocked.</div></div>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><div class="num">05</div><h2>Lineages</h2><div class="suffix">::structural + conceptual</div></div>
+    <div class="lineage-group">
+      <h3>Structural</h3>
+      <div class="pills">
+        <span class="pill">async computation</span>
+        <span class="pill">async graph learning</span>
+        <span class="pill">event-based vision</span>
+        <span class="pill">neuromorphic sensing</span>
+        <span class="pill">state-space streaming</span>
+        <span class="pill">anytime inference</span>
+        <span class="pill">early-exit networks</span>
+        <span class="pill">vision-language-action</span>
+        <span class="pill">multimodal integration</span>
+      </div>
+    </div>
+    <div class="lineage-group">
+      <h3>Conceptual</h3>
+      <div class="pills">
+        <span class="pill">change-point detection</span>
+        <span class="pill">regime switching</span>
+        <span class="pill">anomaly detection</span>
+        <span class="pill">concept drift</span>
+        <span class="pill">burst dynamics</span>
+        <span class="pill">neural criticality</span>
+        <span class="pill">spiking models</span>
+        <span class="pill">ruptura de regularidade</span>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><div class="num">06</div><h2>Entrypoints</h2><div class="suffix">::jump</div></div>
+    <div class="actions">
+      <a class="action" href="https://github.com/PatrickLimaS/DCRNN_PyTorch"><span class="label">Repo</span><span class="title">Source</span><span class="arrow">&rarr;</span></a>
+      <a class="action" href="https://github.com/PatrickLimaS/DCRNN_PyTorch/tree/pytorch_scratch/paper"><span class="label">Paper</span><span class="title">Sections</span><span class="arrow">&rarr;</span></a>
+      <a class="action" href="https://github.com/PatrickLimaS/DCRNN_PyTorch/blob/pytorch_scratch/GOVERNANCE.md"><span class="label">Protocol</span><span class="title">Governance</span><span class="arrow">&rarr;</span></a>
+      <a class="action" href="https://github.com/PatrickLimaS/DCRNN_PyTorch/blob/pytorch_scratch/MEDIA.md"><span class="label">Stack</span><span class="title">Gallery</span><span class="arrow">&rarr;</span></a>
+    </div>
+  </section>
+  <hr class="hr" />
+  <p class="mono-small">// Site is decorative; it projects aesthetic. Authoritative facts live in the repo.<br />// No asset on this page is used to make a capability claim.<br />// If the facade says "cascade" and the repo does not yet run it, the repo is right.</p>
+</main>
+<footer>
+  <div class="inner">
+    <div class="trail">[ EOF // pytorch_scratch // claim-disciplined ]</div>
+    <div>&copy; PatrickLimaS &mdash; MIT (code) / CC-BY 4.0 (docs) unless noted</div>
+  </div>
+</footer>
+</body>
+</html>
