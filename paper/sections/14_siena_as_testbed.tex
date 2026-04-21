@@ -1,0 +1,28 @@
+\section{Siena as a Multi-Channel Temporal Testbed}
+\label{sec:siena-testbed}
+
+The Siena Scalp EEG Database~\citep{siena2020physionet} is used as a
+testbed for the cascade's multi-channel temporal regime, not as a
+seizure-detection benchmark.
+
+\subsection{Why Siena fits the stack}
+
+Siena provides 29--35 scalp EEG channels per recording. Stage~A's
+multi-rate ingestion specification is exercised against a graph of
+sensors arranged by the 10-20 system. Seizure onset is, by clinical
+definition, a rupture of temporal regularity. The electrode arrangement
+forms a spatial graph by construction, fitting the DCRNN substrate.
+
+\subsection{Scope of claims}
+
+Once results are produced, the testbed authorises statements that the
+cascade ingests real multi-channel temporal data and that the recurrent
+core can be applied to EEG input. It does not authorise comparison
+against published seizure-detection baselines or transfer from the
+cognitive stack's proposed layers (\S\ref{sec:cognitive-stack-draft}).
+
+\subsection{Relation to the baseline gate}
+
+The \texttt{dcrnn\_baseline} METR-LA reproduction gate remains
+independent of Siena. Both tracks proceed in parallel; neither alone
+authorises capability claims.
