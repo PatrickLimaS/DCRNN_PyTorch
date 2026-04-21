@@ -1,0 +1,5 @@
+target_id,variant,in_scope,role,n_seeds,seed_std,effect_vs_baseline,effect_sigma_ratio,replicated,baseline_collapse,null_observed
+synthetic_harder,graph_core,True,core_evidence,3,0.006,0.146,24.3,True,False,False
+synthetic_harder,abl_no_graph,True,core_evidence,3,0.065,-0.010,0.15,False,False,True
+yearbook,graph_core,False,scope_probe,1,nan,0.000,nan,False,False,True
+arxiv_wildtime,graph_core,True,scope_match,1,nan,0.050,nan,False,False,False

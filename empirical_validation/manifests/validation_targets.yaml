@@ -1,0 +1,151 @@
+version: 1
+last_updated: 2026-04-20
+
+targets:
+  - id: dcrnn_metrla
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      METR-LA forecasting through the local DCRNN PyTorch substrate.
+      Real-benchmark candidate for testing the Probingnoise two-pillar claim.
+    status: not_started
+    results_path: null
+    notes: |
+      Local substrate lives outside the public repo at ~/DCRNN_PyTorch.
+      Public repo stores governance artifacts and normalized summaries only.
+      No real-benchmark result is yet claimed.
+
+  - id: synthetic_v2
+    kind: stand_in
+    in_scope: true
+    role: core_evidence
+    description: >
+      v2 synthetic stand-in with single abrupt rotation shift.
+      Contributes to the currently supported claim.
+    status: not_started
+    results_path: null
+    notes: |
+      Core claim rests on synthetic evidence externalized in the manuscript and report.
+
+  - id: synthetic_harder
+    kind: stand_in
+    in_scope: true
+    role: core_evidence
+    description: >
+      Harder synthetic stand-in with multi-regime drift, heterogeneous
+      per-node observation noise, and nonstationary label noise.
+    status: not_started
+    results_path: null
+    notes: |
+      Source of the narrowing to the two load-bearing pillars.
+
+  - id: yearbook
+    kind: scope_probe
+    in_scope: false
+    role: scope_probe
+    description: >
+      Wild-Time Yearbook. Per-image classification with no per-timestep
+      cross-node shared structure. Explicitly out of scope of the claim.
+    status: not_started
+    results_path: null
+    null_outcome_interpretation: scope_confirmation_not_falsification
+    notes: |
+      A null on this target confirms the scope limit of the claim.
+      It does not falsify the method.
+
+  - id: arxiv_wildtime
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      Wild-Time arXiv. Multiple subcategories co-drifting per year.
+      Candidate scope-matched real benchmark.
+    status: not_started
+    results_path: null
+    notes: |
+      A passing result here, replicated, is the minimum condition for
+      the core claim to extend beyond synthetic stand-ins.
+
+  - id: mimic_wildtime
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      Wild- id: dcrnn_metrla
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      METR-LA forecasting through the local DCRNN PyTorch substrate.
+      Real-benchmark candidate for testing the Probingnoise two-pillar claim.
+    status: not_started
+    results_path: null
+    notes: |
+      Local substrate lives outside the public repo at ~/DCRNN_PyTorch.
+      Public repo stores governance artifacts and normalized summaries only.
+      No real-benchmark result is yet claimed.
+  - id: synthetic_v2
+    kind: stand_in
+    in_scope: true
+    role: core_evidence
+    description: >
+      v2 synthetic stand-in with single abrupt rotation shift.
+      Contributes to the currently supported claim.
+    status: not_started
+    results_path: null
+    notes: |
+      Core claim rests on synthetic evidence externalized in the manuscript and report.
+
+  - id: synthetic_harder
+    kind: stand_in
+    in_scope: true
+    role: core_evidence
+    description: >
+      Harder synthetic stand-in with multi-regime drift, heterogeneous
+      per-node observation noise, and nonstationary label noise.
+    status: not_started
+    results_path: null
+    notes: |
+      Source of the narrowing to the two load-bearing pillars.
+
+  - id: yearbook
+    kind: scope_probe
+    in_scope: false
+    role: scope_probe
+    description: >
+      Wild-Time Yearbook. Per-image classification with no per-timestep
+      cross-node shared structure. Explicitly out of scope of the claim.
+    status: not_started
+    results_path: null
+    null_outcome_interpretation: scope_confirmation_not_falsification
+    notes: |
+      A null on this target confirms the scope limit of the claim.
+      It does not falsify the method.
+
+  - id: arxiv_wildtime
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      Wild-Time arXiv. Multiple subcategories co-drifting per year.
+      Candidate scope-matched real benchmark.
+    status: not_started
+    results_path: null
+    notes: |
+      A passing result here, replicated, is the minimum condition for
+      the core claim to extend beyond synthetic stand-ins.
+
+  - id: mimic_wildtime
+    kind: scope_match
+    in_scope: true
+    role: scope_match
+    description: >
+      Wild-Time MIMIC. Multiple ICU sites co-drifting per timestep.
+      Candidate scope-matched real benchmark.
+    status: not_started
+    results_path: null
+    notes: |
+      Requires data access review. Not yet queued.
+
+scope_review_log: []

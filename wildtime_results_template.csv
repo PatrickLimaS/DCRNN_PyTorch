@@ -1,0 +1,11 @@
+model,acc_mean,acc_sd,ece,p50_ms,p95_ms,K_mean,notes
+local_only,,,,,,,
+graph_no_residual,,,,,,,
+tent_like,,,,,,,
+proposed_no_scheduler,,,,,,,
+proposed_full,,,,,,,
+abl_no_residual,,,,,,,
+abl_no_graph,,,,,,,
+abl_no_aggregation,,,,,,,
+abl_frozen_scheduler,,,,,,,
+abl_flat_latent,,,,,,,

@@ -1,0 +1,9 @@
+step_order,gate_or_test,comparison,rule,pass_if,outcome_if_fail,next_if_pass
+1,Encoder gate,local_only vs Yearbook ERM sanity range,"If local_only < 0.60, stop and fix encoder. Prefer ~0.70+ and within ~5 points of Yearbook ERM (~0.77-0.81).",local_only >= 0.60,UNDERFIT_ENCODER,Outcome A test
+2,Outcome A test 1,proposed_full vs abl_no_residual,Difference in mean accuracy > 2 * pooled_sd,A1_PASS,Go to Outcome B,Outcome A test 2
+3,Outcome A test 2,proposed_full vs abl_frozen_scheduler,Difference in mean accuracy > 2 * pooled_sd,A2_PASS,Go to Outcome B,OUTCOME_A
+4,Outcome B test 1,graph_no_residual vs local_only,Difference in mean accuracy > 2 * pooled_sd,B1_PASS,Go to Outcome C,Outcome B test 2
+5,Outcome B test 2,proposed_full vs local_only,Difference in mean accuracy > 2 * pooled_sd,B2_PASS,Go to Outcome C,Outcome B closeness test
+6,Outcome B closeness test,abl_no_residual or abl_frozen_scheduler within 2σ of proposed_full,"If either comparator is within 2 * pooled_sd of proposed_full, residual/scheduler not separated",WITHIN_2SIGMA,"If both are clearly worse and A passed, use OUTCOME_A",OUTCOME_B
+7,Outcome C condition,graph_no_residual vs local_only,If graph_no_residual does not beat local_only by > 2 * pooled_sd,NOT_GREATER_THAN_2SIGMA,n/a,OUTCOME_C
+8,Scheduler secondary check,proposed_full K_mean,K_mean near 1.0 = scheduler saving compute; K_mean near 2.0 = scheduler pinned,K_mean ~ 1.0,Scheduler not doing useful compute control,Secondary compute-control claim available
