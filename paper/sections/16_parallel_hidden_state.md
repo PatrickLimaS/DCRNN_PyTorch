@@ -71,3 +71,16 @@ When implemented:
 - Does not retroactively upgrade any existing ablation.
 - Does not satisfy any PENDING from the cognitive stack draft.
 - Future Tier 1 upgrade requires: code behind flags; default-off reproduction of baseline; parallel-on run in same regime; separate `status.json` classification.
+
+## Convergent direction — EEG-GCA (2025)
+
+The EEG-GCA (Frontiers in Medicine, 2025) uses **KL divergence regularization** to align distributions between a target channel and its neighbouring channels, detecting abnormal channel behaviour via the divergence signal. This is a convergent direction with the auxiliary supervision proposed in this section (V4 = DivergenceHead).
+
+Comparison:
+
+- **EEG-GCA:** divergence between channel signal distributions at the representation level; KL divergence is a loss applied to align or distinguish distributions.
+- **This section (§16):** divergence between hidden-state outputs of two aggregation streams; `DivergenceHead` predicts from the pre-fusion difference as auxiliary supervision.
+
+Both operationalise "divergence as supervisory signal" but in different parts of the pipeline (input-level vs hidden-state-level). EEG-GCA strengthens the case that divergence-based supervision is a publishable direction in 2025 within adjacent literature.
+
+**Claim boundary:** §16 remains Tier 3 (specified, not implemented). EEG-GCA is Tier 2 (cited from literature). Their structural similarity does not validate §16's specific implementation.

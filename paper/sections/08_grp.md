@@ -25,3 +25,14 @@ Additive operator inside Stage B. Does not modify surrounding blocks; setting `�
 ## Claim boundary
 
 No claim is made that GRP improves, degrades, or equals the Probingnoise core on any metric. Empirical validation is deferred and gate-blocked by `dcrnn_baseline`.
+
+## Convergent direction — GDGCRN (2025)
+
+The GDGCRN (Yang et al., 2025, IEEE Sensors Journal) introduces a **signal decoupling mechanism** that separates steady-state from non-steady-state components in traffic signals. This is a convergent direction with GRP: both operate on the principle that computation benefits from explicit separation of regimes. The mechanisms differ:
+
+- **GRP (this project):** decouples along the **architectural axis** — global re-entry projection as an operator distinct from local aggregation. The separation is between scales of computation.
+- **GDGCRN:** decouples along the **signal axis** — steady-state and non-steady-state components as distinct data regimes. The separation is between predictability classes of input.
+
+The two are not redundant. GRP could in principle be applied within either branch of a GDGCRN-style decomposition, and GDGCRN's decomposition could in principle be applied to the input of a GRP-augmented network. This is left as a Tier 4 speculation; no implementation is proposed.
+
+**Claim boundary for this subsection:** GRP remains Tier 3 (proposed, not implemented). GDGCRN is Tier 2 (cited from literature). Their composition is Tier 4 (speculative).
