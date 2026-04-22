@@ -19,6 +19,7 @@ model:
   rnn_units: 64
   seq_len: 12
   use_curriculum_learning: true
+probingnoise:
   use_parallel_stream: false
 train:
   base_lr: 0.01

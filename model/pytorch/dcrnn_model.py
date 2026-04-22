@@ -28,7 +28,7 @@ def _resolve_pn_flags(pn_kwargs):
             f"known flags are {sorted(_PROBINGNOISE_DEFAULTS.keys())}",
             RuntimeWarning,
         )
-    flags.update({k: bool(v) for k, v in pn_kwargs.items() if k in _PROBINGNOISE_DEFAULTS})
+    flags.update({k: v for k, v in pn_kwargs.items() if k in _PROBINGNOISE_DEFAULTS})
     return flags
 
 

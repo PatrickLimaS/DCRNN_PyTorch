@@ -8,7 +8,6 @@ data:
 log_level: INFO
 model:
   cl_decay_steps: 2000
-  divergence_loss_weight: 0.1
   filter_type: dual_random_walk
   horizon: 12
   input_dim: 2
@@ -19,9 +18,11 @@ model:
   output_dim: 1
   rnn_units: 64
   seq_len: 12
+  use_curriculum_learning: true
+probingnoise:
+  divergence_loss_weight: 0.1
   use_agg_skip_ln: false
   use_aggregation: true
-  use_curriculum_learning: true
   use_divergence_head: false
   use_graph: true
   use_graph_skip_ln: false
