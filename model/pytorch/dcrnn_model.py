@@ -153,40 +153,19 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         else:
             self._agg_block = None
 
-        # ===== Section 16: parallel hidden-state =====
+        # ===== Section 16 V4=c Option 1: DivergenceHead on existing AggBlock =====
         self._use_parallel_stream = self._pn_flags.get("use_parallel_stream", False)
         self._use_divergence_head = self._pn_flags.get("use_divergence_head", False)
         self._divergence_loss_weight = float(self._pn_flags.get("divergence_loss_weight", 0.1))
 
-        if self._use_parallel_stream:
-            # Second independent aggregation block (V3=a: independent weights)
-            agg_p = LocalGlobalAggBlock(num_nodes=self.num_nodes,
-                                       hidden_dim=self.rnn_units)
-            if self._pn_flags.get("use_agg_skip_ln", False):
-                self._agg_block_parallel = SkipLayerNorm(agg_p, normalized_shape=self.num_nodes * self.rnn_units)
-            else:
-                self._agg_block_parallel = agg_p
-
-            # Learned sigmoid gate (V2=a: soma com gate aprendido)
-            # V4=b recommended initialisation: bias +3.0 so sigmoid(x+3) ≈ 0.95 initially
-            # This keeps the baseline path dominant at start; parallel is additive learner.
-            # Per-node gate: small Linear applied at node level (shared weights across nodes)
-            # rnn_units * rnn_units = 64*64 = 4096 params instead of 13248*13248 = 175M
-            self._parallel_gate = torch.nn.Linear(self.rnn_units, self.rnn_units)
-            torch.nn.init.zeros_(self._parallel_gate.weight)
-            torch.nn.init.constant_(self._parallel_gate.bias, 3.0)
-
-            # DivergenceHead (V4=c: via existing DivergenceHead, reused)
-            if self._use_divergence_head:
-                self._divergence_head = DivergenceHead(dim_in=self.num_nodes * self.rnn_units,
-                                                      dim_out=self.output_dim * self.num_nodes)
-            else:
-                self._divergence_head = None
+        if self._use_divergence_head and self._agg_block is not None:
+            self._divergence_head = DivergenceHead(
+                dim_in=self.num_nodes * self.rnn_units,
+                dim_out=self.output_dim * self.num_nodes,
+            )
         else:
-            self._agg_block_parallel = None
-            self._parallel_gate = None
             self._divergence_head = None
-        # =============================================
+        # =================================================================
 
         self.encoder_model = EncoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
         self.decoder_model = DecoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
@@ -218,25 +197,13 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
             num_layers = encoder_hidden_state.size(0)
             aggregated = []
             for layer_idx in range(num_layers):
-                # ===== Section 16: parallel hidden-state fusion =====
-                if self._use_parallel_stream and self._agg_block_parallel is not None:
+                # ===== Section 16 V4=c Option 1: DivergenceHead path =====
+                if self._use_divergence_head and self._divergence_head is not None:
                     h_t = encoder_hidden_state[layer_idx]
-                    h_graph = self._agg_block(h_t)
-                    h_parallel = self._agg_block_parallel(h_t)
-                    # Per-node gate: reshape to (batch, num_nodes, rnn_units), apply gate, flatten back
-                    b = h_t.size(0)
-                    h_t_nodes = h_t.view(b, self.num_nodes, self.rnn_units)
-                    gate_logits_nodes = self._parallel_gate(h_t_nodes)
-                    gate = torch.sigmoid(gate_logits_nodes).view(b, self.num_nodes * self.rnn_units)
-                    h_fused = gate * h_graph + (1.0 - gate) * h_parallel
-                    aggregated.append(h_fused)
-                    # Store delta for DivergenceHead (if enabled) — consumed in loss computation
-                    if self._use_divergence_head and self._divergence_head is not None:
-                        delta = h_graph - h_parallel
-                        div_pred = self._divergence_head(delta)
-                        # Store on self for loss access; supervisor will read it.
-                        # List is reset at start of encoder() call, appended per layer here.
-                        self._last_div_pred.append(div_pred)
+                    y, z_local, z_global, _ = self._agg_block(h_t, return_parts=True)
+                    aggregated.append(y)
+                    y_div, _ = self._divergence_head(z_local, z_global)
+                    self._last_div_pred.append(y_div)
                 else:
                     aggregated.append(self._agg_block(encoder_hidden_state[layer_idx]))
             encoder_hidden_state = torch.stack(aggregated, dim=0)
