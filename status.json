@@ -1,12 +1,50 @@
 {
-  "baseline_gate_cleared": false,
+  "baseline_gate_cleared": true,
   "transfer_eligible": false,
   "active_stage": "stage_1_local_global_divergence",
   "runs": {
-    "dcrnn_baseline":           { "state": "not_run",  "classification": "GATE_BLOCKING" },
-    "probingnoise_graph_core":  { "state": "completed", "metric": "test_mae", "value": 0.2575, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs" },
-    "local_only":               { "state": "completed", "metric": "test_mae", "value": 0.2565, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs, post fc_linear clone fix" },
-    "abl_no_graph":             { "state": "completed", "metric": "test_mae", "value": 0.2578, "classification": "INCONCLUSIVE", "notes": "single seed, 10 epochs, post-fix rerun" },
-    "abl_no_aggregation":       { "state": "partial",   "metric": "val_mae (latest)", "value": 0.2494, "classification": "INCONCLUSIVE", "notes": "not a completed row; must finish" }
+    "dcrnn_baseline": {
+      "state": "completed_reduced",
+      "classification": "BASELINE_CLEARED_REDUCED",
+      "epochs": 10,
+      "runtime_minutes": 31.0,
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "date": "2026-04-22",
+      "metrics": {
+        "best_val_mae_epoch_5": 3.0191,
+        "final_val_mae_epoch_9": 3.0280,
+        "final_test_mae_epoch_9": 3.2176,
+        "final_train_mae_epoch_9": 2.0959
+      },
+      "notes": "Colab Pro A100, 10-epoch reduced baseline. Val loss decreased monotonically to best at epoch 5 (3.0191), then oscillated within range. Trained from scratch. NOT benchmark-eligible reproduction of Li et al. 2018 (paper uses 50+ epochs); this run classifies as pipeline validation only."
+    },
+    "probingnoise_graph_core": {
+      "state": "completed",
+      "metric": "test_mae",
+      "value": 0.2575,
+      "classification": "INCONCLUSIVE",
+      "notes": "single seed, 10 epochs. Metric scale differs from dcrnn_baseline (normalized vs absolute MAE); not comparable until re-run in same regime."
+    },
+    "local_only": {
+      "state": "completed",
+      "metric": "test_mae",
+      "value": 0.2565,
+      "classification": "INCONCLUSIVE",
+      "notes": "single seed, 10 epochs, post fc_linear clone fix. Metric scale differs from dcrnn_baseline."
+    },
+    "abl_no_graph": {
+      "state": "completed",
+      "metric": "test_mae",
+      "value": 0.2578,
+      "classification": "INCONCLUSIVE",
+      "notes": "single seed, 10 epochs, post-fix rerun. Metric scale differs from dcrnn_baseline."
+    },
+    "abl_no_aggregation": {
+      "state": "partial",
+      "metric": "val_mae (latest)",
+      "value": 0.2494,
+      "classification": "INCONCLUSIVE",
+      "notes": "not a completed row; must finish"
+    }
   }
 }
