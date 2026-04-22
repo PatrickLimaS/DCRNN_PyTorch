@@ -169,8 +169,9 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
             # Learned sigmoid gate (V2=a: soma com gate aprendido)
             # V4=b recommended initialisation: bias +3.0 so sigmoid(x+3) ≈ 0.95 initially
             # This keeps the baseline path dominant at start; parallel is additive learner.
-            gate_dim = self.num_nodes * self.rnn_units
-            self._parallel_gate = torch.nn.Linear(gate_dim, gate_dim)
+            # Per-node gate: small Linear applied at node level (shared weights across nodes)
+            # rnn_units * rnn_units = 64*64 = 4096 params instead of 13248*13248 = 175M
+            self._parallel_gate = torch.nn.Linear(self.rnn_units, self.rnn_units)
             torch.nn.init.zeros_(self._parallel_gate.weight)
             torch.nn.init.constant_(self._parallel_gate.bias, 3.0)
 
@@ -219,9 +220,11 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
                     h_t = encoder_hidden_state[layer_idx]
                     h_graph = self._agg_block(h_t)
                     h_parallel = self._agg_block_parallel(h_t)
-                    # Gate: g = sigmoid(W·h_t + b), initialised so g≈0.95 (baseline-preserving)
-                    gate_logits = self._parallel_gate(h_t)
-                    gate = torch.sigmoid(gate_logits)
+                    # Per-node gate: reshape to (batch, num_nodes, rnn_units), apply gate, flatten back
+                    b = h_t.size(0)
+                    h_t_nodes = h_t.view(b, self.num_nodes, self.rnn_units)
+                    gate_logits_nodes = self._parallel_gate(h_t_nodes)
+                    gate = torch.sigmoid(gate_logits_nodes).view(b, self.num_nodes * self.rnn_units)
                     h_fused = gate * h_graph + (1.0 - gate) * h_parallel
                     aggregated.append(h_fused)
                     # Store delta for DivergenceHead (if enabled) — consumed in loss computation
