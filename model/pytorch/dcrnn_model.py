@@ -137,6 +137,7 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         super().__init__()
         Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
         self._pn_flags = _resolve_pn_flags(pn_kwargs)
+        self.output_dim = int(model_kwargs.get('output_dim', 1))
         logger.info("probingnoise flags resolved: %s", self._pn_flags)
 
         # Patch 3 (File 5): instantiate aggregation module on DCRNNModel so it
