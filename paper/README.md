@@ -14,12 +14,15 @@
 - sections/10_related_lineages.md + .tex
 - sections/11_droid_openvla_integration.md + .tex
 - sections/12_evidence_matrix.md + .tex
-- sections/13_cognitive_stack_draft.md + .tex  (DRAFT; Q1 resolved in section 18)
+- sections/13_cognitive_stack_draft.md + .tex  (DRAFT; Q1 in 18, Q6 in 19)
 - sections/14_siena_as_testbed.md + .tex
 - sections/15_problem_statement.md
-- sections/16_parallel_hidden_state.md  (PROPOSAL — intra-model)
-- sections/17_droid_parallel_integration.md  (PROPOSAL — inter-model)
-- sections/18_cognitive_stack_q1_resolved.md  (RESOLUTION — Q1, framing B)
+- sections/16_parallel_hidden_state.md  (PROPOSAL intra-model)
+- sections/17_droid_parallel_integration.md  (PROPOSAL inter-model)
+- sections/18_cognitive_stack_q1_resolved.md  (RESOLUTION Q1: framing B)
+- sections/19_cognitive_stack_q6_resolved.md  (RESOLUTION Q6: schedule-based gating)
 - bibtex/references.bib
 
 All text follows the four-tier claim protocol. See GOVERNANCE.md.
+
+PENDING cognitive-stack items: Q2 (layer signatures), Q3 (dialogue monitoring), Q4 (dialogue modulation), Q5 (internal update schedule), Q7 (ablation degradation).
