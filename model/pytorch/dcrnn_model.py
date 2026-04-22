@@ -178,8 +178,8 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
 
             # DivergenceHead (V4=c: via existing DivergenceHead, reused)
             if self._use_divergence_head:
-                self._divergence_head = DivergenceHead(input_dim=self.num_nodes * self.rnn_units,
-                                                      output_dim=self.output_dim * self.num_nodes)
+                self._divergence_head = DivergenceHead(dim_in=self.num_nodes * self.rnn_units,
+                                                      dim_out=self.output_dim * self.num_nodes)
             else:
                 self._divergence_head = None
         else:
