@@ -160,7 +160,7 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         if self._use_parallel_stream:
             # Second independent aggregation block (V3=a: independent weights)
             agg_p = LocalGlobalAggBlock(num_nodes=self.num_nodes,
-                                       rnn_units=self.rnn_units)
+                                       hidden_dim=self.rnn_units)
             if self._pn_flags.get("use_agg_skip_ln", False):
                 self._agg_block_parallel = SkipLayerNorm(agg_p, normalized_shape=self.num_nodes * self.rnn_units)
             else:
