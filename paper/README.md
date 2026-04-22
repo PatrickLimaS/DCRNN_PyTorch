@@ -16,6 +16,7 @@
 - sections/12_evidence_matrix.md + .tex
 - sections/13_cognitive_stack_draft.md + .tex  (DRAFT)
 - sections/14_siena_as_testbed.md + .tex
+- sections/15_problem_statement.md
 - bibtex/references.bib
 
 All text follows the four-tier claim protocol. See top-level GOVERNANCE.md.
