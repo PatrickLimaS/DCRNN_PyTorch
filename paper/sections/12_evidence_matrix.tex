@@ -1,0 +1,32 @@
+\section{Evidence Matrix}
+\label{sec:evidence-matrix}
+
+Audit-friendly summary of what is validated, what is proposed, and what
+remains under specification.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l l l p{0.40\linewidth}}
+\toprule
+\textbf{Component} & \textbf{Status} & \textbf{Implementation} & \textbf{Claim} \\
+\midrule
+Recurrent Coordination Core & Validated & DCRNN PyTorch substrate & Load-bearing infrastructure for temporal-shift robustness. \\
+Multi-Layer Extension & Proposed & Five layers + dialogue layer & Proposed structural analogue; modulation under specification. \\
+\bottomrule
+\end{tabular}
+\caption{Evidence matrix separating validated from proposed components.}
+\label{tab:evidence-matrix}
+\end{table}
+
+The Validated row corresponds to Tier~1; the Proposed row to Tier~3.
+Items under specification remain Tier~4 until operational detail is
+committed.
+
+\subsection*{Gate status (2026-04-22)}
+
+The \texttt{dcrnn\_baseline} gate is marked
+\texttt{BASELINE\_CLEARED\_REDUCED}. A 10-epoch reduced run on A100
+completed with best val\_mae $3.0191$ at epoch~5 and final test\_mae
+$3.2176$ at epoch~9. This classifies as pipeline validation, not
+benchmark reproduction of Li et al.~(2018).

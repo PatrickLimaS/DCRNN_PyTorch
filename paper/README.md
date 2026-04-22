@@ -14,7 +14,7 @@
 - sections/10_related_lineages.md + .tex
 - sections/11_droid_openvla_integration.md + .tex
 - sections/12_evidence_matrix.md + .tex
-- sections/13_cognitive_stack_draft.md + .tex
+- sections/13_cognitive_stack_draft.md + .tex  (DRAFT)
 - sections/14_siena_as_testbed.md + .tex
 - bibtex/references.bib
 
