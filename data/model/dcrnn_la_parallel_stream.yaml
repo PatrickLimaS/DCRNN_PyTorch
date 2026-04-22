@@ -23,7 +23,7 @@ probingnoise:
   divergence_loss_weight: 0.1
   use_agg_skip_ln: false
   use_aggregation: true
-  use_divergence_head: false
+  use_divergence_head: true
   use_graph: true
   use_graph_skip_ln: false
   use_parallel_stream: true

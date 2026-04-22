@@ -132,6 +132,39 @@ class DCRNNSupervisor:
 
                 output = self.dcrnn_model(x)
                 loss = self._compute_loss(y, output)
+
+                # V4=c: augment loss with DivergenceHead auxiliary supervision on main target
+
+                div_preds = getattr(self.dcrnn_model, '_last_div_pred', None)
+
+                div_weight = getattr(self.dcrnn_model, '_divergence_loss_weight', 0.0)
+
+                if div_preds and div_weight > 0 and getattr(self.dcrnn_model, '_use_divergence_head', False):
+
+                    # Each div_pred has shape (batch, output_dim * num_nodes); target y_true reshaped to match
+
+                    div_loss_terms = []
+
+                    for dp in div_preds:
+
+                        # dp: (batch, output_dim*num_nodes); reshape to match ONE-STEP prediction
+
+                        # Use the FIRST horizon step as regression target for auxiliary head
+
+                        y_target = y_true[0] if y_true.dim() >= 3 else y_true
+
+                        y_flat = y_target.reshape(y_target.size(0), -1)
+
+                        dp_flat = dp.reshape(dp.size(0), -1)
+
+                        min_dim = min(y_flat.size(1), dp_flat.size(1))
+
+                        div_loss_terms.append(torch.nn.functional.l1_loss(dp_flat[:, :min_dim], y_flat[:, :min_dim]))
+
+                    aux_loss = sum(div_loss_terms) / len(div_loss_terms)
+
+                    loss = loss + div_weight * aux_loss
+
                 losses.append(loss.item())
 
                 y_truths.append(y.cpu())

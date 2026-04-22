@@ -203,6 +203,8 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         :param inputs: shape (seq_len, batch_size, num_sensor * input_dim)
         :return: encoder_hidden_state: (num_layers, batch_size, self.hidden_state_size)
         """
+        # Reset divergence predictions list at start of each encoder pass (V4=c)
+        self._last_div_pred = []
         encoder_hidden_state = None
         for t in range(self.encoder_model.seq_len):
             _, encoder_hidden_state = self.encoder_model(inputs[t], encoder_hidden_state)
@@ -232,8 +234,7 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
                         delta = h_graph - h_parallel
                         div_pred = self._divergence_head(delta)
                         # Store on self for loss access; supervisor will read it.
-                        if not hasattr(self, "_last_div_pred"):
-                            self._last_div_pred = []
+                        # List is reset at start of encoder() call, appended per layer here.
                         self._last_div_pred.append(div_pred)
                 else:
                     aggregated.append(self._agg_block(encoder_hidden_state[layer_idx]))
