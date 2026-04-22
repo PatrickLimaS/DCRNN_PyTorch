@@ -17,6 +17,8 @@
 - sections/13_cognitive_stack_draft.md + .tex  (DRAFT)
 - sections/14_siena_as_testbed.md + .tex
 - sections/15_problem_statement.md
+- sections/16_parallel_hidden_state.md  (PROPOSAL — intra-model)
+- sections/17_droid_parallel_integration.md  (PROPOSAL — inter-model)
 - bibtex/references.bib
 
-All text follows the four-tier claim protocol. See top-level GOVERNANCE.md.
+All text follows the four-tier claim protocol. See GOVERNANCE.md.
