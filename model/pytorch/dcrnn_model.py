@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from model.pytorch.dcrnn_cell import DCGRUCell
-from model.pytorch.probingnoise_blocks import LocalGlobalAggBlock, SkipLayerNorm
+from model.pytorch.probingnoise_blocks import LocalGlobalAggBlock, SkipLayerNorm, DivergenceHead
 
 _PROBINGNOISE_DEFAULTS = {
     "use_graph": True,
@@ -140,6 +140,41 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
                 self._agg_block = agg
         else:
             self._agg_block = None
+
+        # ===== Section 16: parallel hidden-state =====
+        self._use_parallel_stream = self._pn_flags.get("use_parallel_stream", False)
+        self._use_divergence_head = self._pn_flags.get("use_divergence_head", False)
+        self._divergence_loss_weight = float(self._pn_flags.get("divergence_loss_weight", 0.1))
+
+        if self._use_parallel_stream:
+            # Second independent aggregation block (V3=a: independent weights)
+            agg_p = LocalGlobalAggBlock(num_nodes=self.num_nodes,
+                                       rnn_units=self.rnn_units)
+            if self._pn_flags.get("use_agg_skip_ln", False):
+                self._agg_block_parallel = SkipLayerNorm(agg_p, normalized_shape=self.num_nodes * self.rnn_units)
+            else:
+                self._agg_block_parallel = agg_p
+
+            # Learned sigmoid gate (V2=a: soma com gate aprendido)
+            # V4=b recommended initialisation: bias +3.0 so sigmoid(x+3) ≈ 0.95 initially
+            # This keeps the baseline path dominant at start; parallel is additive learner.
+            gate_dim = self.num_nodes * self.rnn_units
+            self._parallel_gate = torch.nn.Linear(gate_dim, gate_dim)
+            torch.nn.init.zeros_(self._parallel_gate.weight)
+            torch.nn.init.constant_(self._parallel_gate.bias, 3.0)
+
+            # DivergenceHead (V4=c: via existing DivergenceHead, reused)
+            if self._use_divergence_head:
+                self._divergence_head = DivergenceHead(input_dim=self.num_nodes * self.rnn_units,
+                                                      output_dim=self.output_dim * self.num_nodes)
+            else:
+                self._divergence_head = None
+        else:
+            self._agg_block_parallel = None
+            self._parallel_gate = None
+            self._divergence_head = None
+        # =============================================
+
         self.encoder_model = EncoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
         self.decoder_model = DecoderModel(adj_mx, pn_flags=self._pn_flags, **model_kwargs)
         self.cl_decay_steps = int(model_kwargs.get('cl_decay_steps', 1000))
@@ -168,7 +203,26 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
             num_layers = encoder_hidden_state.size(0)
             aggregated = []
             for layer_idx in range(num_layers):
-                aggregated.append(self._agg_block(encoder_hidden_state[layer_idx]))
+                # ===== Section 16: parallel hidden-state fusion =====
+                if self._use_parallel_stream and self._agg_block_parallel is not None:
+                    h_t = encoder_hidden_state[layer_idx]
+                    h_graph = self._agg_block(h_t)
+                    h_parallel = self._agg_block_parallel(h_t)
+                    # Gate: g = sigmoid(W·h_t + b), initialised so g≈0.95 (baseline-preserving)
+                    gate_logits = self._parallel_gate(h_t)
+                    gate = torch.sigmoid(gate_logits)
+                    h_fused = gate * h_graph + (1.0 - gate) * h_parallel
+                    aggregated.append(h_fused)
+                    # Store delta for DivergenceHead (if enabled) — consumed in loss computation
+                    if self._use_divergence_head and self._divergence_head is not None:
+                        delta = h_graph - h_parallel
+                        div_pred = self._divergence_head(delta)
+                        # Store on self for loss access; supervisor will read it.
+                        if not hasattr(self, "_last_div_pred"):
+                            self._last_div_pred = []
+                        self._last_div_pred.append(div_pred)
+                else:
+                    aggregated.append(self._agg_block(encoder_hidden_state[layer_idx]))
             encoder_hidden_state = torch.stack(aggregated, dim=0)
 
         return encoder_hidden_state
