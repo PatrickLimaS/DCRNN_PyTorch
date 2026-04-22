@@ -10,6 +10,9 @@ _PROBINGNOISE_DEFAULTS = {
     "use_aggregation": False,
     "use_graph_skip_ln": False,
     "use_agg_skip_ln": False,
+    "use_parallel_stream": False,
+    "use_divergence_head": False,
+    "divergence_loss_weight": 0.1,
 }
 
 
