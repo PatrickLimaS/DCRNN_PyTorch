@@ -39,6 +39,14 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
+# s16 flags are consumed at DCRNNModel level only; filter them out before DCGRUCell
+_S16_ONLY_FLAGS = {"use_parallel_stream", "use_divergence_head", "divergence_loss_weight"}
+
+
+def _cell_flags(pn_flags):
+    return {k: v for k, v in pn_flags.items() if k not in _S16_ONLY_FLAGS}
+
+
 class Seq2SeqAttrs:
     def __init__(self, adj_mx, **model_kwargs):
         self.adj_mx = adj_mx
@@ -60,7 +68,7 @@ class EncoderModel(nn.Module, Seq2SeqAttrs):
         self._pn_flags = pn_flags if pn_flags is not None else dict(_PROBINGNOISE_DEFAULTS)
         self.dcgru_layers = nn.ModuleList(
             [DCGRUCell(self.rnn_units, adj_mx, self.max_diffusion_step, self.num_nodes,
-                       filter_type=self.filter_type, **self._pn_flags) for _ in range(self.num_rnn_layers)])
+                       filter_type=self.filter_type, **_cell_flags(self._pn_flags)) for _ in range(self.num_rnn_layers)])
 
     def forward(self, inputs, hidden_state=None):
         """
@@ -98,7 +106,7 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
         self._pn_flags = pn_flags if pn_flags is not None else dict(_PROBINGNOISE_DEFAULTS)
         self.dcgru_layers = nn.ModuleList(
             [DCGRUCell(self.rnn_units, adj_mx, self.max_diffusion_step, self.num_nodes,
-                       filter_type=self.filter_type, **self._pn_flags) for _ in range(self.num_rnn_layers)])
+                       filter_type=self.filter_type, **_cell_flags(self._pn_flags)) for _ in range(self.num_rnn_layers)])
 
     def forward(self, inputs, hidden_state=None):
         """
