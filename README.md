@@ -1,208 +1,54 @@
-> **🔬 Research in progress — claim-disciplined.**
-> This repo follows a formal validation ladder. Current stage: pre-baseline.
-> See [GOVERNANCE.md](GOVERNANCE.md) for the evidence protocol and
-> [NEXT_STEPS.md](NEXT_STEPS.md) for the roadmap.
-# DCRNN_PyTorch + Probingnoise
+# DCRNN_PyTorch — Probingnoise research substrate
 
-This repository merges DCRNN PyTorch implementation with the Probingnoise validation & paper work.
+Active branch: `pytorch_scratch`.
 
----
+This repository is a research substrate, in public, combining the DCRNN architecture (Li et al., 2017) with a claim-disciplined documentation protocol. It is not a benchmark reproduction. It is not a validated clinical or production system. It is a space where architectural proposals are specified alongside the empirical work that constrains them.
 
-## DCRNN (original)
+## Current state (snapshot: 2026-04-22)
 
-# Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting
+**Validated (Tier 1):**
+- DCRNN baseline reimplemented in PyTorch; runs end-to-end at reduced regime (10 epochs, A100, test_mae 3.22). Single seed.
+- Probingnoise variant `abl_no_aggregation` runs end-to-end at same regime. Two seeds. Test_mae 3.33 / 3.47. Seed-to-seed variance ~0.14.
+- Siena EEG preprocessing pipeline runs on one patient (PN00).
 
-![Diffusion Convolutional Recurrent Neural Network](figures/model_architecture.jpg "Model Architecture")
+**Specified (Tier 3):**
+- Section 16: parallel hidden-state operator, intra-model, with learned gate fusion and DivergenceHead auxiliary supervision.
+- Section 17: inter-model variant using DROID features with cross-attention fusion.
+- Section 18: cognitive stack in co-processor framing (Q1 resolved).
+- Section 19: schedule-based gating as stability mechanism (Q6 resolved).
 
-This is a PyTorch implementation of Diffusion Convolutional Recurrent Neural Network in the following paper: \
-Yaguang Li, Rose Yu, Cyrus Shahabi, Yan Liu, [Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting](https://arxiv.org/abs/1707.01926), ICLR 2018.
+**Known limits:**
+- Single-seed comparisons are insufficient for categorical claims.
+- Four ablation variants are committed under a normalised-MAE regime and remain INCONCLUSIVE until re-run in the current absolute-MAE regime.
+- No proposed extension (§§16–19) is implemented.
+- No training loop has been run on the Siena EEG dataset.
 
+## Structure
 
-## Requirements
-* torch
-* scipy>=0.19.0
-* numpy>=1.12.1
-* pandas>=0.19.2
-* pyyaml
-* statsmodels
-* tensorflow>=1.3.0
-* torch
-* tables
-* future
+- `model/pytorch/` — DCRNN core and Probingnoise blocks (`LocalGlobalAggBlock`, `SkipLayerNorm`, `DivergenceHead`).
+- `paper/sections/` — 20 sections, each with declared claim tier.
+- `paper/bibtex/references.bib` — ~40 peer-reviewed entries, including GDGCRN (2025) and DGDCN (2025) as convergent recent directions.
+- `docs/partial_reports/` — one report per empirical run, with explicit classification (`PIPELINE_VALIDATED_REDUCED`, `PIPELINE_VALIDATED_REDUCED_MULTI_SEED`).
+- `docs/site/` — public-facing cyberpunk terminal facade.
+- `status.json` — single source of truth for run state and metrics.
+- `GOVERNANCE.md` — claim protocol and partial report template.
 
-Dependency can be installed using the following command:
-```bash
-pip install -r requirements.txt
-```
+## Claim protocol
 
-### Comparison with Tensorflow implementation
+Every section in `paper/` and every report in `docs/partial_reports/` declares one of four tiers:
 
-In MAE (For LA dataset, PEMS-BAY coming in a while)
+- **Tier 1** — Implemented and tested; evidence in this repository.
+- **Tier 2** — Cited from literature; reference in `references.bib`.
+- **Tier 3** — Proposed; specified here but not implemented.
+- **Tier 4** — Speculative; explicitly marked as future direction.
 
-| Horizon | Tensorflow | Pytorch |
-|:--------|:--------:|:--------:|
-| 1 Hour |   3.69   |   3.12   |    
-| 30 Min |   3.15   |   2.82   |    
-| 15 Min |   2.77   |   2.56   |    
+No claim in this repository is allowed to cross tiers without an accompanying evidence bundle. The Evidence Matrix (`paper/sections/12_evidence_matrix.md`) tracks where each row sits.
 
+## Site
 
-## Data Preparation
-The traffic data files for Los Angeles (METR-LA) and the Bay Area (PEMS-BAY), i.e., `metr-la.h5` and `pems-bay.h5`, are available at [Google Drive](https://drive.google.com/open?id=10FOTa6HXPqX8Pf5WRoRwcFnW9BrNZEIX) or [Baidu Yun](https://pan.baidu.com/s/14Yy9isAIZYdU__OYEQGa_g), and should be
-put into the `data/` folder.
-The `*.h5` files store the data in `panads.DataFrame` using the `HDF5` file format. Here is an example:
+A public-facing summary is available at:
+https://patricklimas.github.io/DCRNN_PyTorch/site/
 
-|                     | sensor_0 | sensor_1 | sensor_2 | sensor_n |
-|:-------------------:|:--------:|:--------:|:--------:|:--------:|
-| 2018/01/01 00:00:00 |   60.0   |   65.0   |   70.0   |    ...   |
-| 2018/01/01 00:05:00 |   61.0   |   64.0   |   65.0   |    ...   |
-| 2018/01/01 00:10:00 |   63.0   |   65.0   |   60.0   |    ...   |
-|         ...         |    ...   |    ...   |    ...   |    ...   |
+## License and attribution
 
-
-Here is an article about [Using HDF5 with Python](https://medium.com/@jerilkuriakose/using-hdf5-with-python-6c5242d08773).
-
-Run the following commands to generate train/test/val dataset at  `data/{METR-LA,PEMS-BAY}/{train,val,test}.npz`.
-```bash
-# Create data directories
-mkdir -p data/{METR-LA,PEMS-BAY}
-
-# METR-LA
-python -m scripts.generate_training_data --output_dir=data/METR-LA --traffic_df_filename=data/metr-la.h5
-
-# PEMS-BAY
-python -m scripts.generate_training_data --output_dir=data/PEMS-BAY --traffic_df_filename=data/pems-bay.h5
-```
-
-## Graph Construction
- As the currently implementation is based on pre-calculated road network distances between sensors, it currently only
- supports sensor ids in Los Angeles (see `data/sensor_graph/sensor_info_201206.csv`).
-```bash
-python -m scripts.gen_adj_mx  --sensor_ids_filename=data/sensor_graph/graph_sensor_ids.txt --normalized_k=0.1\
-    --output_pkl_filename=data/sensor_graph/adj_mx.pkl
-```
-Besides, the locations of sensors in Los Angeles, i.e., METR-LA, are available at [data/sensor_graph/graph_sensor_locations.csv](https://github.com/liyaguang/DCRNN/blob/master/data/sensor_graph/graph_sensor_locations.csv).
-
-## Run the Pre-trained Model on METR-LA
-
-```bash
-# METR-LA
-python run_demo_pytorch.py --config_filename=data/model/pretrained/METR-LA/config.yaml
-
-# PEMS-BAY
-python run_demo_pytorch.py --config_filename=data/model/pretrained/PEMS-BAY/config.yaml
-```
-The generated prediction of DCRNN is in `data/results/dcrnn_predictions`.
-
-
-## Model Training
-```bash
-# METR-LA
-python dcrnn_train_pytorch.py --config_filename=data/model/dcrnn_la.yaml
-
-# PEMS-BAY
-python dcrnn_train_pytorch.py --config_filename=data/model/dcrnn_bay.yaml
-```
-
-There is a chance that the training loss will explode, the temporary workaround is to restart from the last saved model before the explosion, or to decrease the learning rate earlier in the learning rate schedule. 
-
-
-## Eval baseline methods
-```bash
-# METR-LA
-python -m scripts.eval_baseline_methods --traffic_reading_filename=data/metr-la.h5
-```
-
-### PyTorch Results
-
-![PyTorch Results](figures/result1.png "PyTorch Results")
-
-![PyTorch Results](figures/result2.png "PyTorch Results")
-
-![PyTorch Results](figures/result3.png "PyTorch Results")
-
-![PyTorch Results](figures/result4.png "PyTorch Results")
-
-## Citation
-
-If you find this repository, e.g., the code and the datasets, useful in your research, please cite the following paper:
-```
-@inproceedings{li2018dcrnn_traffic,
-  title={Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting},
-  author={Li, Yaguang and Yu, Rose and Shahabi, Cyrus and Liu, Yan},
-  booktitle={International Conference on Learning Representations (ICLR '18)},
-  year={2018}
-}
-```
-
----
-
-## Probingnoise (validation + paper)
-
-# Probingnoise
-
-Probingnoise treats adaptation under temporal shift as a coordination problem, not just a local prediction problem.
-## Claim (narrow)
-
-On tasks where there is shared-signal structure across nodes at each
-timestep, skip-connected graph coordination plus skip-connected
-local-global aggregation is load-bearing under temporal shift.
-
-## Scope of current evidence
-
-All empirical evidence in this repository comes from two synthetic
-stand-ins (v2 and harder). No real-benchmark result is yet claimed.
-
-## Validated core
-
-- Graph coordination with skip + LayerNorm
-- Local-global aggregation with skip connection
-
-## Conditional extensions (not validated core)
-
-- Residual gating
-- Adaptive scheduling
-
-On both synthetic stand-ins these two components fail to outperform
-their ablations. They are retained as optional modules pending a task
-where they earn their place empirically.
-## Main files
-
-Legacy PDFs in the repository root are retained temporarily and should not be treated as the current authoritative paper version.
-
-- `paper_final_version_draft_regenerated_1776633194.pdf`
-- `paper_validacao_externa.pdf`
-- `REPORT_SPRINT3.md`
-...
-## Wild-Time positioning
-
-Wild-Time Yearbook is included as a scope / falsification probe.
-Yearbook lacks per-timestep cross-node shared structure, so a null
-result there would confirm the scope limit of the claim, not falsify
-the method. A positive benchmark requires a Wild-Time task whose
-distribution-shift structure is cross-node correlated per timestep
-(candidates: arXiv, MIMIC).
-
-## Project status
-
-| Item | Status |
-| --- | --- |
-| Narrow claim framing | done |
-| Synthetic stand-in evidence (v2 + harder) | done |
-| Scope-matched real benchmark | pending |
-| Wild-Time Yearbook scope probe | pending |
-
-## Repository layout
-
-- `REPORT_SPRINT3.md` — current empirical report
-- `WILDTIME_RUNBOOK.md` — runbook for the Yearbook scope probe
-- `wildtime_loader.py`, `preflight_wildtime.py`, `run_wildtime.py` — adapter and runner
-- `results_aggregate.csv`, `per_regime_table.csv`, `latency_table.csv` — synthetic stand-in results
-- `archive/` — superseded drafts, retained for provenance only
-
-## Author
-
-Patrick S.,DS
-
-## Related Stack
-
-Researchers in async computation, async graph learning, event-based / neuromorphic vision, state-space / streaming models, anytime and early-exit inference, vision-language-action models, change-point / anomaly detection, concept drift, or burst / criticality in neural dynamics: see [`paper/sections/10_related_lineages.md`](paper/sections/10_related_lineages.md) for the full lineage map, and [`MEDIA.md`](MEDIA.md) for a visual gallery of the stack.
+Built on the DCRNN PyTorch reimplementation by Chintan Shah (chnsh/DCRNN_PyTorch), itself derived from the original DCRNN TensorFlow implementation by Li et al. (liyaguang/DCRNN).
