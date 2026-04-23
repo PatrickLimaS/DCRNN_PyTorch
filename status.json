@@ -127,6 +127,32 @@
       "best_val_mae": 2.9157,
       "best_val_epoch": 8,
       "notes": "3-seed aggregate: mean 3.1892, std 0.0628 (< 0.1). Multi-seed defensible."
+    },
+    {
+      "run_id": "baseline_reduced_seed2_2026-04-23",
+      "section": "baseline",
+      "tier": 1,
+      "regime": "reduced (10 epochs)",
+      "gpu": "RTX PRO 6000 Blackwell (G4)",
+      "runtime_min": 14.1,
+      "total_params": 372353,
+      "seed": 2,
+      "test_mae": 3.0663,
+      "best_val_mae": 2.8916,
+      "best_val_epoch": 9
+    },
+    {
+      "run_id": "baseline_reduced_seed3_2026-04-23",
+      "section": "baseline",
+      "tier": 1,
+      "regime": "reduced (10 epochs)",
+      "gpu": "RTX PRO 6000 Blackwell (G4)",
+      "runtime_min": 14.0,
+      "total_params": 372353,
+      "seed": 3,
+      "test_mae": 3.1395,
+      "best_val_mae": 2.9523,
+      "best_val_epoch": 9
     }
   ],
   "empirical_aggregates": {
@@ -147,6 +173,31 @@
       "params": 3149712,
       "tier": 1,
       "defensibility": "MULTI_SEED_DEFENSIBLE"
+    },
+    "baseline_reduced_3seeds": {
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "test_mae_values": [
+        3.2176,
+        3.0663,
+        3.1395
+      ],
+      "mean": 3.1411,
+      "std_sample": 0.0757,
+      "params": 372353,
+      "tier": 1
+    },
+    "matched_baseline_vs_s16v4c": {
+      "baseline_mean": 3.1411,
+      "baseline_std": 0.0757,
+      "s16_mean": 3.1892,
+      "s16_std": 0.0628,
+      "delta_s16_minus_baseline": 0.0481,
+      "ranges_overlap": true,
+      "interpretation": "\u00a716 V4=c Option 1 does NOT improve over baseline. 8.5x params no measurable benefit. Single-seed comparison misleading."
     }
   }
 }
