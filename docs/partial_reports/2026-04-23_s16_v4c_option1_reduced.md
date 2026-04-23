@@ -136,3 +136,77 @@ Delta §16 vs baseline: +0.003 MAE (essentially identical).
 - Does not overfit despite large capacity - possible regularization from DivergenceHead aux loss
 
 No claim of improvement. No claim of harm. Next: seed 3 to complete statistical triangle.
+
+---
+
+## Update 2026-04-23: Seed 3 results (multi-seed defensible)
+
+Third seed completes the statistical triangle. All three seeds used run_with_seed.py wrapper.
+
+### Trajectory (seed 3)
+
+| Epoch | train_mae | val_mae |
+|-------|-----------|---------|
+| 0 | 2.8082 | 3.5210 |
+| 1 | 2.3636 | 3.2949 |
+| 2 | 2.2983 | 3.2200 |
+| 3 | 2.2512 | 3.0716 |
+| 4 | 2.2113 | 3.0934 |
+| 5 | 2.1845 | 3.0670 |
+| 6 | 2.1651 | 3.0247 |
+| 7 | 2.1418 | 2.9323 |
+| 8 | 2.1273 | 2.9157 (best val) |
+| 9 | 2.1159 | 2.9487 |
+
+Final test_mae: **3.1269**
+Best val_mae: **2.9157** (epoch 8)
+Runtime: 30.9 min on A100
+
+### Three-seed summary
+
+| Seed | best_val | best_val_epoch | test_mae |
+|------|----------|----------------|----------|
+| 1 | 2.9636 | 6 | 3.2525 |
+| 2 | 2.9486 | 8 | 3.1883 |
+| 3 | 2.9157 | 8 | 3.1269 |
+
+Aggregate statistics over 3 seeds:
+- Mean test_mae: **3.1892**
+- Std (sample, n-1): **0.0628**
+- Min: 3.1269 / Max: 3.2525
+
+### Multi-seed defensibility
+
+Std 0.0628 < 0.1 threshold. §16 V4=c Option 1 is multi-seed Tier 1 defensible.
+
+### Updated comparison
+
+| Row | Model | test_mae | std | params | seeds |
+|-----|-------|----------|-----|--------|-------|
+| 1 | baseline | 3.2176 | - | 372,353 | 1 |
+| 2 | abl_no_aggregation | 3.3979 | 0.097 | 372,865 | 2 |
+| 3 | §16 V4=c Option 1 | 3.1892 | 0.0628 | 3,149,712 | 3 |
+
+Delta §16 vs baseline single-seed: -0.0284 MAE.
+
+### Claim boundary
+
+What this shows:
+- §16 V4=c Option 1 produces stable test_mae (std 0.063)
+- Mean numerically lower than baseline single-seed
+- Variance lower than abl_no_aggregation
+- Architecture converges reliably
+
+What this does NOT show:
+- Delta -0.03 within §16 std (0.063) - not significant
+- Baseline variance unknown (1 seed) - matched multi-seed required
+- Architectural effect not separable from capacity (8.5x params)
+- Reduced regime (10 epochs), not full training
+- Single dataset
+
+### Next movements
+
+1. Baseline seeds 2, 3 for variance
+2. Fair-capacity baseline (rnn_units 192, ~3M params)
+3. Best-val checkpoint evaluation
+4. Post-Pro+: full training 100 epochs x 3 seeds

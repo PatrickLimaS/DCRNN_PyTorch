@@ -113,6 +113,40 @@
       "best_val_mae": 2.9486,
       "best_val_epoch": 8,
       "notes": "Delta vs seed 1: 0.064 MAE. Mean 2 seeds: 3.2204, std 0.0454. Essentially identical to baseline."
+    },
+    {
+      "run_id": "s16_v4c_option1_reduced_seed3_2026-04-23",
+      "section": "16",
+      "variant": "V4=c Option 1",
+      "tier": 1,
+      "regime": "reduced (10 epochs)",
+      "runtime_min": 30.9,
+      "total_params": 3149712,
+      "seed": 3,
+      "test_mae": 3.1269,
+      "best_val_mae": 2.9157,
+      "best_val_epoch": 8,
+      "notes": "3-seed aggregate: mean 3.1892, std 0.0628 (< 0.1). Multi-seed defensible."
     }
-  ]
+  ],
+  "empirical_aggregates": {
+    "s16_v4c_option1_reduced_3seeds": {
+      "model": "\u00a716 V4=c Option 1",
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "test_mae_values": [
+        3.2525,
+        3.1883,
+        3.1269
+      ],
+      "mean": 3.1892,
+      "std_sample": 0.0628,
+      "params": 3149712,
+      "tier": 1,
+      "defensibility": "MULTI_SEED_DEFENSIBLE"
+    }
+  }
 }
