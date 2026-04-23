@@ -78,5 +78,27 @@
       "comparable_to_baseline": true,
       "notes": "Two seeds. Seed-to-seed variance similar to baseline-vs-ablation delta."
     }
-  }
+  },
+  "empirical_runs": [
+    {
+      "run_id": "s16_v4c_option1_reduced_2026-04-23",
+      "config": "dcrnn_la_parallel_stream.yaml",
+      "section": "16",
+      "variant": "V4=c Option 1",
+      "tier": 1,
+      "classification": "PIPELINE_VALIDATED_REDUCED + EXTENSION_EMPIRICAL_SINGLE_SEED",
+      "dataset": "METR-LA",
+      "regime": "reduced (10 epochs)",
+      "gpu": "A100 80GB",
+      "runtime_min": 31.4,
+      "total_params": 3149712,
+      "seeds": 1,
+      "test_mae": 3.2525,
+      "best_val_mae": 2.9636,
+      "best_val_epoch": 6,
+      "commit": "003a7ff",
+      "report": "docs/partial_reports/2026-04-23_s16_v4c_option1_reduced.md",
+      "claim_boundary": "Single seed. Delta vs baseline (+0.035) within noise floor (~0.14). Architectural effect not separable from capacity effect (8.5x params). No improvement or harm claim."
+    }
+  ]
 }
