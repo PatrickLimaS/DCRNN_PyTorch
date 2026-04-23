@@ -85,3 +85,54 @@ What this run does NOT show:
 ## Governance note
 
 First Tier 3 → Tier 1 promotion. Path: 11 iterations, 9 bugs caught, conceptual re-reading at iteration 9, diagnostic script validation before commit, two smoke tests, one reduced run. No false Tier 1 claim made during process.
+
+---
+
+## Update 2026-04-23: Seed 2 results
+
+Second seed of §16 V4=c Option 1 via run_with_seed.py wrapper (torch.manual_seed(2) before training imports).
+
+Trajectory (seed 2):
+
+| Epoch | train_mae | val_mae |
+|-------|-----------|---------|
+| 4 | 2.2196 | 3.0743 |
+| 5 | 2.1898 | 3.0228 |
+| 6 | 2.1661 | 3.0248 |
+| 7 | 2.1617 | 3.1585 |
+| 8 | 2.1310 | 2.9486 (best val) |
+| 9 | 2.1167 | 2.9887 |
+
+Final test_mae: **3.1883**
+Best val_mae: **2.9486** (epoch 8)
+Runtime: 31.2 min
+
+## Multi-seed summary (2 seeds)
+
+| | Seed 1 | Seed 2 |
+|---|---|---|
+| best_val_mae | 2.9636 | 2.9486 |
+| test_mae | 3.2525 | 3.1883 |
+
+Delta seeds: 0.064 MAE (within 0.1 stability threshold).
+Mean test_mae: 3.2204
+Std (n=2): 0.0454
+
+## Updated comparison
+
+| Row | Model | test_mae (mean) | params | seeds |
+|-----|-------|-----------------|--------|-------|
+| 1 | dcrnn_baseline | 3.2176 | 372,353 | 1 |
+| 2 | abl_no_aggregation | 3.3979 | 372,865 | 2 |
+| 3 | §16 V4=c Option 1 | 3.2204 | 3,149,712 | 2 |
+
+Delta §16 vs baseline: +0.003 MAE (essentially identical).
+
+## Honest interpretation updated
+
+- §16 V4=c produces test_mae 3.22 ± 0.05 across 2 seeds
+- Mean essentially identical to baseline (delta +0.003)
+- With 8.5x more parameters, §16 reaches same test performance
+- Does not overfit despite large capacity - possible regularization from DivergenceHead aux loss
+
+No claim of improvement. No claim of harm. Next: seed 3 to complete statistical triangle.

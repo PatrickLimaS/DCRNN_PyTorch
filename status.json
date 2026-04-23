@@ -99,6 +99,20 @@
       "commit": "003a7ff",
       "report": "docs/partial_reports/2026-04-23_s16_v4c_option1_reduced.md",
       "claim_boundary": "Single seed. Delta vs baseline (+0.035) within noise floor (~0.14). Architectural effect not separable from capacity effect (8.5x params). No improvement or harm claim."
+    },
+    {
+      "run_id": "s16_v4c_option1_reduced_seed2_2026-04-23",
+      "section": "16",
+      "variant": "V4=c Option 1",
+      "tier": 1,
+      "regime": "reduced (10 epochs)",
+      "runtime_min": 31.2,
+      "total_params": 3149712,
+      "seed": 2,
+      "test_mae": 3.1883,
+      "best_val_mae": 2.9486,
+      "best_val_epoch": 8,
+      "notes": "Delta vs seed 1: 0.064 MAE. Mean 2 seeds: 3.2204, std 0.0454. Essentially identical to baseline."
     }
   ]
 }
