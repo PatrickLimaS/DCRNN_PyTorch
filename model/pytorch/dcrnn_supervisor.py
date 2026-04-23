@@ -151,7 +151,7 @@ class DCRNNSupervisor:
 
                         # Use the FIRST horizon step as regression target for auxiliary head
 
-                        y_target = y_truth[0] if y_truth.dim() >= 3 else y_truth
+                        y_target = y[0] if y.dim() >= 3 else y
 
                         y_flat = y_target.reshape(y_target.size(0), -1)
 
