@@ -228,6 +228,20 @@ class DCRNNSupervisor:
 
                 loss = self._compute_loss(y, output)
 
+                # V4=c: augment training loss with DivergenceHead auxiliary supervision
+                div_preds = getattr(self.dcrnn_model, '_last_div_pred', None)
+                div_weight = getattr(self.dcrnn_model, '_divergence_loss_weight', 0.0)
+                if div_preds and div_weight > 0 and getattr(self.dcrnn_model, '_use_divergence_head', False):
+                    div_loss_terms = []
+                    for dp in div_preds:
+                        y_target = y[0] if y.dim() >= 3 else y
+                        y_flat = y_target.reshape(y_target.size(0), -1)
+                        dp_flat = dp.reshape(dp.size(0), -1)
+                        min_dim = min(y_flat.size(1), dp_flat.size(1))
+                        div_loss_terms.append(torch.nn.functional.l1_loss(dp_flat[:, :min_dim], y_flat[:, :min_dim]))
+                    aux_loss = sum(div_loss_terms) / len(div_loss_terms)
+                    loss = loss + div_weight * aux_loss
+
                 self._logger.debug(loss.item())
 
                 losses.append(loss.item())
